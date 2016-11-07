@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = (state, ownProps) => {
+
   return {
     displayName: state.auth.isAuthenticated ? state.auth.user.displayName : ' ',
     profilePic: state.auth.isAuthenticated ? state.auth.user.photoURL : 'http://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
