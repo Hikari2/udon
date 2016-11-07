@@ -13,10 +13,6 @@ class Home extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Icon.Button name='close' backgroundColor='#3b5998' onPress={this.props.onLogoutClick}>
-          Logout
-        </Icon.Button>
-        <Icon.Button name='navicon' backgroundColor='#d3d3d3' onPress={Actions.drawer} />
       </View>
     )
   }
@@ -28,17 +24,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 })
 
 const mapStateToProps = (state) => {
@@ -49,9 +35,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onLogoutClick: () => {
-      dispatch(logout())
-    },
 
   }
 }

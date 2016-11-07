@@ -8,10 +8,9 @@ import {
 import { connect } from 'react-redux'
 import Drawer from 'react-native-drawer'
 import { DefaultRenderer, Actions } from 'react-native-router-flux'
-import SideMenu from '../components/SideMenu'
+import SideMenu from '../containers/SideMenu'
 
-
-class SideMenuDrawer extends Component {
+export default class SideMenuDrawer extends Component {
   constructor(props) {
     super(props)
   }
@@ -21,19 +20,21 @@ class SideMenuDrawer extends Component {
   }
 
   render() {
-    const state = this.props.navigationState;
-    const children = state.children;
+    const state = this.props.navigationState
+    const children = state.children
+
     return (
         <Drawer
             ref="navigation"
             open={state.open}
             onOpen={()=>Actions.refresh({key:state.key, open: true})}
             onClose={()=>Actions.refresh({key:state.key, open: false})}
-            type="displace"
+            type="overlay"
             content={<SideMenu />}
             tapToClose={true}
-            openDrawerOffset={0.2}
-            panCloseMask={0.2}
+            openDrawerOffset={0.4}
+            panOpenMask={0.3}
+            panCloseMask={0.7}
             negotiatePan={true}
             tweenHandler={(ratio) => ({
              main: { opacity:Math.max(0.54,1-ratio) }
@@ -43,40 +44,3 @@ class SideMenuDrawer extends Component {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  button: {
-    padding:10,
-    height:45,
-    overflow:'hidden',
-    borderRadius:4,
-    backgroundColor: 'lightblue'
-  },
-  button_text: {
-    fontSize: 20,
-    color: 'white'
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  }
-})
-
-const mapStateToProps = (state, ownProps) => {
-  return {
-    navigationState: ownProps.navigationState
-  }
-}
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-
-  }
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SideMenuDrawer)
