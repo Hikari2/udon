@@ -30,13 +30,18 @@ function responseInfoCallback(error: ?Object, result: ?Object) {
 
 export function getFaceBookGraph() {
   const infoRequest = new GraphRequest(
-    '/me/home',
+    '/me?fields=location',
+    ///106505586052951?fields=location
     null,
     responseInfoCallback,
   )
   return function(dispatch, getState) {
     new GraphRequestManager().addRequest(infoRequest).start()
   }
+}
+
+export function getUserLocation() {
+  
 }
 
 export function loginFaceBook() {
@@ -52,6 +57,7 @@ export function loginFaceBook() {
               return auth.signInWithCredential(credential)
           })
           .then(credData => {
+                    console.log(JSON.stringify(credData, null, 2))
               dispatch(loginSuccess(credData))
           })
           .catch(err => {
