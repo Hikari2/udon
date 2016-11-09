@@ -32,7 +32,7 @@ export default class SideMenuDrawer extends Component {
             type="overlay"
             content={<SideMenu />}
             openDrawerOffset={0.4}
-            panOpenMask={0.3}
+            panOpenMask={0.18}
             panCloseMask={0.5}
             negotiatePan={true}
             tweenHandler={(ratio) => ({

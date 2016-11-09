@@ -8,7 +8,7 @@ import {
 import { createStore, applyMiddleware  } from 'redux'
 import thunk from 'redux-thunk'
 import { Provider, connect } from 'react-redux'
-import { Router, Scene, Switch } from 'react-native-router-flux'
+import { Router, Scene, Switch, Modal } from 'react-native-router-flux'
 import reducer from './reducers'
 import LoginPage from './containers/LoginPage'
 import Home from './containers/Home'
@@ -37,12 +37,10 @@ export default class udon extends Component {
             tabs={true}
             unmountScenes
             selector={props=>props.isAuthenticated ? 'drawer' : 'loginPage'}>
-            <Scene key='loginPage' component={LoginPage} title='Login Page' />
+            <Scene key='loginPage' component={LoginPage} title=' ' />
             <Scene key='drawer' component={SideMenuDrawer} open={false} initial>
-              <Scene
-                key="main"
-                tabs>
-                <Scene
+                <Scene key='modal' component={Modal}>
+                  <Scene
                     key='home'
                     title='Home'
                     navigationBarStyle={{ backgroundColor: '#ffffff' }}
@@ -50,12 +48,12 @@ export default class udon extends Component {
                     component={Home}
                   />
                   <Scene
-                      key='groups'
-                      title='Groups'
-                      navigationBarStyle={{ backgroundColor: '#ffffff' }}
-                      titleStyle={{ color: '#000000' }}
-                      component={UserPage}
-                    />
+                    key='groups'
+                    title='Groups'
+                    navigationBarStyle={{ backgroundColor: '#ffffff' }}
+                    titleStyle={{ color: '#000000' }}
+                    component={UserPage}
+                  />
               </Scene>
             </Scene>
           </Scene>

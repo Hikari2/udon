@@ -9,7 +9,8 @@ import { connect } from 'react-redux'
 import Drawer from 'react-native-drawer'
 import { DefaultRenderer, Actions } from 'react-native-router-flux'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import { logout } from '../actions'
+import { publishPost } from '../actions/post'
+import { logout } from '../actions/auth'
 
 class SideMenu extends Component {
   constructor(props) {
@@ -25,30 +26,10 @@ class SideMenu extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.profileContainer}>
-          <Image source={{uri: this.props.profilePic}} style={styles.profilePic}  />
+          <Image source={{uri: this.props.profilePic}} style={styles.profilePic} />
           <Text style={styles.displayName}>{this.props.displayName}</Text>
         </View>
         <View style={styles.optionsContainer}>
-          <Icon.Button
-            name='home'
-            color='#000000'
-            backgroundColor='#ffffff'
-            onPress={()=> {drawer.close(); Actions.home();}}
-          >
-            <Text style={styles.optionText}>
-              Home
-            </Text>
-          </Icon.Button>
-          <Icon.Button
-            name='group'
-            color='#000000'
-            backgroundColor='#ffffff'
-            onPress={()=> {drawer.close(); Actions.groups();}}
-          >
-            <Text style={styles.optionText}>
-              Groups
-            </Text>
-          </Icon.Button>
           <Icon.Button
             name='close'
             color='#000000'
@@ -75,7 +56,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FFFFFF',
+    borderRightWidth: 0.5,
+    borderColor: '#d6d7da'
   },
   profileContainer: {
     flex: 1,
@@ -110,7 +93,6 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = (state, ownProps) => {
-
   return {
     displayName: state.auth.isAuthenticated ? state.auth.user.displayName : ' ',
     profilePic: state.auth.isAuthenticated ? state.auth.user.photoURL : 'http://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png'
@@ -121,6 +103,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onLogoutClick: () => {
       dispatch(logout())
+    },
+    onPublishClick: (post) => {
+      dispatch(publishPost(post))
     }
   }
 }

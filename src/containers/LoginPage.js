@@ -9,7 +9,8 @@ import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { LoginManager, AccessToken, LoginButton} from 'react-native-fbsdk'
-import { loginFaceBook, checkLogin } from '../actions'
+import { loginFaceBook, checkLogin } from '../actions/auth'
+import { logout } from '../actions/auth'
 
 class LoginPage extends Component {
   constructor(props) {
@@ -58,6 +59,7 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
+  //dispatch(logout())
   return {
     onLoad: () => {
       dispatch(checkLogin())

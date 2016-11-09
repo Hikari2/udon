@@ -2,26 +2,36 @@ import React, { Component } from 'react'
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  ScrollView
 } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
-import { logout, getFaceBookGraph } from '../actions'
+import ScrollableTabView, {ScrollableTabBar}  from 'react-native-scrollable-tab-view'
+import UserPage from './UserPage'
+import HomeNavBar from '../components/HomeNavBar'
+import NewPostView from '../containers/NewPostView'
+import EditPostView from '../containers/EditPostView'
+import BrowsePostView from '../containers/BrowsePostView'
 
 class Home extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-          <Icon.Button
-            name='close'
-            color='#000000'
-            backgroundColor='#ffffff'
-            onPress={this.props.onLogoutClick}
-          >aa
-          </Icon.Button>
-      </View>
+      <ScrollableTabView
+        renderTabBar={() => <HomeNavBar />}
+      >
+      <ScrollView tabLabel='home'>
+        <BrowsePostView />
+      </ScrollView>
+      <ScrollView tabLabel='folder-open'>
+        <EditPostView />
+      </ScrollView>
+      <ScrollView tabLabel='plus'>
+        <NewPostView/>
+      </ScrollView>
+      </ScrollableTabView>
     )
   }
 }
@@ -43,8 +53,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onLogoutClick: () => {
-      dispatch(getFaceBookGraph())
+    onSubmitPostForm: (post) => {
+      dispatch(publishPost(post))
     }
   }
 }

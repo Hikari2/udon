@@ -5,7 +5,8 @@ import {
   LOGGED_OUT
 } from '../actions'
 
-const auth = (state = {
+const auth = (
+  state = {
     isAuthenticated: false,
     errorMessage: ''
   }, action) => {
