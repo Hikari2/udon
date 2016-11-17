@@ -14,7 +14,7 @@ const FacebookTabBar = React.createClass({
   propTypes: {
     goToPage: React.PropTypes.func,
     activeTab: React.PropTypes.number,
-    tabs: React.PropTypes.array,
+    tabs: React.PropTypes.array
   },
 
   componentDidMount() {
