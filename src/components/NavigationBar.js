@@ -34,32 +34,27 @@ const FacebookTabBar = React.createClass({
 
   //color between rgb(59,89,152) and rgb(204,204,204)
   iconColor(progress) {
-    const red = 59 + (204 - 59) * progress;
-    const green = 89 + (204 - 89) * progress;
-    const blue = 152 + (204 - 152) * progress;
+    const red = 122 + (219 - 122) * progress;
+    const green = 82 + (147 - 82) * progress;
+    const blue = 48 + (86 - 48) * progress;
     return `rgb(${red}, ${green}, ${blue})`;
   },
 
   render() {
     return(
       <View>
-        <Icon.Button
-          name='navicon'
-          backgroundColor='#d3d3d3'
-          onPress={() => {
-            Actions.refresh({key: 'drawer', open: value => !value })
-          }}
-        />
-        <View style={[styles.tabs, this.props.style, ]}>
+        <View style={styles.optionBar}>
+        </View>
+        <View style={[styles.tabs, this.props.style]}>
           {this.props.tabs.map((tab, i) => {
             return <TouchableOpacity key={tab} onPress={() => this.props.goToPage(i)} style={styles.tab}>
               <Icon
                 name={tab}
                 size={30}
-                color={this.props.activeTab === i ? 'rgb(59,89,152)' : 'rgb(204,204,204)'}
+                color={this.props.activeTab === i ? 'rgb(122,82,48)' : 'rgb(219,147,86)'}
                 ref={(icon) => { this.tabIcons[i] = icon; }}
               />
-            </TouchableOpacity>;
+            </TouchableOpacity>
           })}
         </View>
       </View>
@@ -68,6 +63,10 @@ const FacebookTabBar = React.createClass({
 });
 
 const styles = StyleSheet.create({
+  optionBar: {
+    height: 50,
+    backgroundColor: '#7a5230'
+  },
   tab: {
     flex: 1,
     alignItems: 'center',
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: 'rgba(0,0,0,0.05)'
   },
 });
 

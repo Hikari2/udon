@@ -11,34 +11,46 @@ const auth = firebase.auth()
 const provider = firebase.auth.FacebookAuthProvider
 
 export function loginFaceBook() {
-  return function(dispatch, getState) {
-    LoginManager.logInWithReadPermissions(['public_profile', 'email']).then(
+  return function(dispatch) {
+    LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_friends']).then(
       loginResult => {
         if (loginResult.isCancelled) {
-          console.log('user canceled')
+          Alert.alert('user canceled')
           dispatch(loginFailure('user canceled'))
         } else {
           AccessToken.getCurrentAccessToken()
           .then(accessTokenData => {
               const credential = provider.credential(accessTokenData.accessToken)
-              console.log(accessTokenData)
               return auth.signInWithCredential(credential)
           })
           .then(credData => {
-            console.log(credData)
+            storeUser(credData, 'facebook')
             dispatch(loginSuccess(credData))
-          })
-          .catch(err => {
-              console.log(err)
-              dispatch(loginFailure(err))
           })
         }
     },
     error => {
-      console.log(error)
-      dispatch(loginFailure(error.toString()))
+      console.log(error.toString())
+      Alert.alert('Something went wrong while trying to login2')
     })
   }
+}
+
+
+function storeUser(user, provider) {
+  const userList = firebase.database().ref('user_list/'+ provider + '/' + user.providerData[0].uid)
+  const userData = {
+    displayName: user.displayName,
+    email: user.email,
+    photoURL: user.photoURL,
+    uid: user.uid
+  }
+  userList.set(userData)
+  .then(() => {
+  }, error => {
+    console.log(error.toString())
+    Alert.alert('Something went wrong while trying to store user data')
+  })
 }
 
 export function logout() {

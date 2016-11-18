@@ -11,11 +11,8 @@ import { Provider, connect } from 'react-redux'
 import { Router, Scene, Switch, Modal } from 'react-native-router-flux'
 import reducer from './reducers'
 import LoginPage from './containers/LoginPage'
-import Home from './containers/Home'
-import UserPage from './containers/UserPage'
-import SideMenuDrawer from './components/SideMenuDrawer'
-import * as firebase from 'firebase'
-import Drawer from 'react-native-drawer'
+import MainContainer from './containers/MainContainer'
+import NewPetView from './containers/NewPetView'
 
 let store = createStore(
   reducer,
@@ -36,25 +33,18 @@ export default class udon extends Component {
             component={connect(state=>({isAuthenticated:state.auth.isAuthenticated}))(Switch)}
             tabs={true}
             unmountScenes
-            selector={props=>props.isAuthenticated ? 'drawer' : 'loginPage'}>
+            selector={props=>props.isAuthenticated ? 'main' : 'loginPage'}>
             <Scene key='loginPage' component={LoginPage} title=' ' />
-            <Scene key='drawer' component={SideMenuDrawer} open={false} initial>
-                <Scene key='modal' component={Modal}>
-                  <Scene
-                    key='home'
-                    title='Home'
-                    navigationBarStyle={{ backgroundColor: '#ffffff' }}
-                    titleStyle={{ color: '#000000' }}
-                    component={Home}
-                  />
-                  <Scene
-                    key='groups'
-                    title='Groups'
-                    navigationBarStyle={{ backgroundColor: '#ffffff' }}
-                    titleStyle={{ color: '#000000' }}
-                    component={UserPage}
-                  />
-              </Scene>
+            <Scene key='main'>
+              <Scene
+                key='mainContainer'
+                hideNavBar
+                component={MainContainer}
+              />
+              <Scene
+                key='newPet'
+                component={NewPetView}
+              />
             </Scene>
           </Scene>
         </Router>

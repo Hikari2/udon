@@ -9,28 +9,31 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
 import ScrollableTabView, {ScrollableTabBar}  from 'react-native-scrollable-tab-view'
-import UserPage from './UserPage'
-import HomeNavBar from '../components/HomeNavBar'
-import NewPostView from '../containers/NewPostView'
-import EditPostView from '../containers/EditPostView'
-import BrowsePostView from '../containers/BrowsePostView'
+import NavigationBar from '../components/NavigationBar'
+import SearchPostsView from './SearchPostsView'
+import MyPostsView from './MyPostsView'
+import NewPostView from './NewPostView'
+import UserView from './UserView'
 
-class Home extends Component {
+class MainContainer extends Component {
 
   render() {
     return (
       <ScrollableTabView
-        renderTabBar={() => <HomeNavBar />}
+        renderTabBar={() => <NavigationBar />}
       >
-      <ScrollView tabLabel='home'>
-        <BrowsePostView />
-      </ScrollView>
-      <ScrollView tabLabel='folder-open'>
-        <EditPostView />
-      </ScrollView>
-      <ScrollView tabLabel='plus'>
-        <NewPostView/>
-      </ScrollView>
+        <ScrollView tabLabel='search'>
+          <SearchPostsView />
+        </ScrollView>
+        <ScrollView tabLabel='folder-open'>
+          <MyPostsView />
+        </ScrollView>
+        <ScrollView tabLabel='plus'>
+          <NewPostView/>
+        </ScrollView>
+        <ScrollView tabLabel='user'>
+          <UserView/>
+        </ScrollView>
       </ScrollableTabView>
     )
   }
@@ -62,4 +65,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Home)
+)(MainContainer)

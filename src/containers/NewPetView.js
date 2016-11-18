@@ -11,25 +11,22 @@ import {
 } from 'react-native'
 import { Alert } from 'react-native'
 import { connect } from 'react-redux'
-import Drawer from 'react-native-drawer'
 import { DefaultRenderer, Actions } from 'react-native-router-flux'
 import Camera from 'react-native-camera'
 import t from 'tcomb-form-native'
-import {publishPost} from '../actions/post'
+import {registerPet} from '../actions/pet'
 import countyList from '../constants/county'
 import Icon from 'react-native-vector-icons/FontAwesome'
+import {getSize} from '../constants/dog'
 
-class NewPostView extends Component {
+class NewPetView extends Component {
   constructor(props) {
     super(props)
     const user = props.user
     this.state = {
       camera: false,
-      photos: [],
-      value: {
-        name: user.displayName,
-        email: user.email
-      }
+      photo: '',
+      value: {}
     }
   }
 
@@ -39,43 +36,41 @@ class NewPostView extends Component {
 
   renderForm() {
     return (
-      <View style={styles.container}>
-        <Form
-          ref='form'
-          type={this.state.value.type === 'Selling' ? SellingPost : BuyingPost}
-          options={options}
-          value={this.state.value}
-          onChange={(value) => {
-            this.setState({value})
-          }}
-        />
-        <View style={styles.cameraContainer}>
-          {this.state.camera ? this.renderCamera() : this.renderCameraButton()}
-          <View style={styles.previewContainer}>
-            <ScrollView horizontal>
-            {
-              this.state.photos.map((image, i) => {
-                return <Image source={{uri: image.path}} style={styles.previewImage} key={`image-${i}`}/>
-              })
-            }
-            </ScrollView>
-          </View>
+      <ScrollView>
+        <View style={styles.container}>
+            <Form
+              ref='form'
+              type={Dog}
+              options={options}
+              value={this.state.value}
+              onChange={(value) => {
+                this.setState({value})
+              }}
+            />
+            <View style={styles.cameraContainer}>
+              {this.state.camera ? this.renderCamera() : this.renderCameraButton()}
+              <View style={styles.previewContainer}>
+                <Image source={{uri: this.state.photo.path}} style={styles.previewImage} />
+              </View>
+            </View>
+            <TouchableHighlight
+              style={styles.button}
+              onPress={()=>{
+                const val = this.refs.form.getValue()
+                if(val) {
+                  this.props.onSubmit({
+                    values: val,
+                    size: getSize(val.weight),
+                    photo: this.state.photo
+                  })
+                  Actions.pop()
+                }
+              }}
+              underlayColor='#aa7243'>
+              <Text style={styles.buttonText}>Post</Text>
+            </TouchableHighlight>
         </View>
-        <TouchableHighlight
-          style={styles.button}
-          onPress={()=>{
-            const val = this.refs.form.getValue()
-            if(val) {
-              this.props.onSubmit({
-                values: val,
-                photos: this.state.photos
-              })
-            }
-          }}
-          underlayColor='#aa7243'>
-          <Text style={styles.buttonText}>Post</Text>
-        </TouchableHighlight>
-      </View>
+      </ScrollView>
     )
   }
 
@@ -106,10 +101,8 @@ class NewPostView extends Component {
 
   takePicture() {
     this.camera.capture()
-      .then((image) => {
-        const photos = this.state.photos
-        photos.push(image)
-        this.setState({photos})
+      .then((photo) => {
+        this.setState({photo})
       })
       .catch(err => Alert.alert(err.toString()))
   }
@@ -119,23 +112,10 @@ const Form = t.form.Form
 const Type = t.enums.of(['Selling', 'Buying'], 'Type')
 const County = t.enums.of(countyList, 'County')
 
-const SellingPost = t.struct({
+const Dog = t.struct({
   name: t.String,
-  email: t.String,
-  type: Type,
-  heading: t.String,
-  description: t.String,
-  county: County,
-  price: t.Number
-})
-
-const BuyingPost = t.struct({
-  name: t.String,
-  email: t.String,
-  type: Type,
-  heading: t.String,
-  description: t.String,
-  county: County
+  age: t.Number,
+  weight: t.Number
 })
 
 const textArea = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
@@ -160,29 +140,11 @@ const options = {
       stylesheet: textField,
       underlineColorAndroid: 'transparent'
     },
-    email: {
-      stylesheet: textField,
-      editable: false,
+    age: {
+      stylesheet: numberInput,
       underlineColorAndroid: 'transparent'
     },
-    type: {
-      nullOption: {value: '', text: 'Choose post type!'}
-    },
-    heading: {
-      stylesheet: textField,
-      underlineColorAndroid: 'transparent'
-    },
-    description: {
-      underlineColorAndroid: 'transparent',
-      numberOfLines: 5,
-      multiline: true,
-      stylesheet: textArea
-    },
-    county: {
-      factory: t.form.Radio,
-      nullOption: {value: '', text: 'Choose county!'}
-    },
-    price: {
+    weight: {
       stylesheet: numberInput,
       underlineColorAndroid: 'transparent'
     }
@@ -193,7 +155,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     marginTop: 10,
-    padding: 10,
+    padding: 40,
     backgroundColor: '#ffffff'
   },
   buttonText: {
@@ -256,7 +218,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    loading: state.post.isPublishing,
+    loading: state.pet.isRegistering,
     user: state.auth.isAuthenticated ? state.auth.user.providerData[0] : {}
   }
 }
@@ -264,7 +226,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onSubmit: (post) => {
-      dispatch(publishPost(post))
+      dispatch(registerPet(post))
     }
   }
 }
@@ -272,4 +234,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(NewPostView)
+)(NewPetView)
