@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import {
   StyleSheet,
-  Text,
+  Platform,
   View,
-  Dimensions,
   TouchableHighlight,
   Image,
   ScrollView,
@@ -11,212 +10,130 @@ import {
 } from 'react-native'
 import { Alert } from 'react-native'
 import { connect } from 'react-redux'
-import { DefaultRenderer, Actions } from 'react-native-router-flux'
-import Camera from 'react-native-camera'
-import t from 'tcomb-form-native'
+import { Actions } from 'react-native-router-flux'
 import {registerPet} from '../actions/pet'
-import countyList from '../constants/county'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import {getSize} from '../constants/dog'
+import PetForm from '../components/PetForm'
+import ImagePicker  from 'react-native-image-picker'
 
 class NewPetView extends Component {
   constructor(props) {
     super(props)
-    const user = props.user
     this.state = {
       camera: false,
-      photo: '',
-      value: {}
+      photo: {}
     }
   }
 
   render() {
-    return this.props.loading ? <ActivityIndicator /> : this.renderForm()
+    return this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderForm()
   }
 
   renderForm() {
     return (
       <ScrollView>
         <View style={styles.container}>
-            <Form
-              ref='form'
-              type={Dog}
-              options={options}
-              value={this.state.value}
-              onChange={(value) => {
-                this.setState({value})
-              }}
-            />
-            <View style={styles.cameraContainer}>
-              {this.state.camera ? this.renderCamera() : this.renderCameraButton()}
-              <View style={styles.previewContainer}>
-                <Image source={{uri: this.state.photo.path}} style={styles.previewImage} />
-              </View>
+          <PetForm user={this.props.user} onSubmit={(pet) => {
+            pet.photo = this.state.photo
+            this.props.onSubmit(pet)
+          }}>
+            <View style={styles.photoContainer}>
+            {
+              this.state.photo.path ?
+                <View style={styles.photoWrapper}>{this.savedPhoto(this.state.photo.path)}</View> :
+                <View style={styles.photoWrapper}>{this.newPhoto()}</View>
+            }
             </View>
-            <TouchableHighlight
-              style={styles.button}
-              onPress={()=>{
-                const val = this.refs.form.getValue()
-                if(val) {
-                  this.props.onSubmit({
-                    values: val,
-                    size: getSize(val.weight),
-                    photo: this.state.photo
-                  })
-                  Actions.pop()
-                }
-              }}
-              underlayColor='#aa7243'>
-              <Text style={styles.buttonText}>Post</Text>
-            </TouchableHighlight>
+          </PetForm>
         </View>
       </ScrollView>
     )
   }
 
-  renderCameraButton() {
+  savedPhoto(path) {
     return (
+      <TouchableHighlight onPress={() => this.addPhoto()}>
+        <Image source={{uri: path}} style={{height: 100, width: 100}} />
+      </TouchableHighlight>
+    )
+  }
+
+  newPhoto() {
+    return(
       <Icon.Button
         name='camera'
-        backgroundColor='transparent'
-        underlayColor='#aa7243'
-        style={styles.cameraButton}
-        iconStyle={styles.cameraIcon}
-        onPress={() => this.setState({camera: true})} />
+        size={30}
+        color='black'
+        backgroundColor='white'
+        style={{borderRadius: 0}}
+        iconStyle={{padding: 25, marginRight: 0}}
+        onPress={() => this.addPhoto()} />
     )
   }
 
-  renderCamera() {
-    return (
-      <Camera
-        ref={(cam) => {
-          this.camera = cam;
-        }}
-        style={styles.preview}
-        aspect={Camera.constants.Aspect.fill}>
-        <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[Push]</Text>
-      </Camera>
-    )
-  }
-
-  takePicture() {
-    this.camera.capture()
-      .then((photo) => {
+  addPhoto() {
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker')
+      }
+      else if (response.error) {
+        Alert.alert('Whops! something went wrong')
+      }
+      else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton)
+      }
+      else {
+        let source
+        if(Platform.OS === 'android') {
+          source = response.uri
+        } else {
+          source = response.uri.replace('file://', '')
+        }
+        const photo = this.state.photo
+        photo.path = source
         this.setState({photo})
-      })
-      .catch(err => Alert.alert(err.toString()))
+      }
+    })
   }
 }
 
-const Form = t.form.Form
-const Type = t.enums.of(['Selling', 'Buying'], 'Type')
-const County = t.enums.of(countyList, 'County')
-
-const Dog = t.struct({
-  name: t.String,
-  age: t.Number,
-  weight: t.Number
-})
-
-const textArea = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
-textArea.textbox.normal.borderRadius= 0
-textArea.textbox.normal.height = 100
-textArea.textbox.error.height= 100
-
-const textField = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
-textField.textbox.normal.borderRadius= 0
-textField.textbox.error.borderRadius= 0
-textField.textbox.notEditable.borderRadius= 0
-
-const numberInput = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
-numberInput.textbox.normal.width= 150
-numberInput.textbox.normal.borderRadius= 0
-numberInput.textbox.error.borderRadius= 0
-numberInput.textbox.notEditable.borderRadius= 0
+NewPetView.propTypes = {
+  loading: React.PropTypes.bool,
+  user: React.PropTypes.object,
+  onSubmit: React.PropTypes.func
+}
 
 const options = {
-  fields: {
-    name: {
-      stylesheet: textField,
-      underlineColorAndroid: 'transparent'
-    },
-    age: {
-      stylesheet: numberInput,
-      underlineColorAndroid: 'transparent'
-    },
-    weight: {
-      stylesheet: numberInput,
-      underlineColorAndroid: 'transparent'
-    }
+  title: '',
+  customButtons: [
+
+  ],
+  storageOptions: {
+    skipBackup: true,
+    path: 'images'
   }
-}
+};
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     justifyContent: 'center',
     marginTop: 10,
-    padding: 40,
+    padding: 10,
     backgroundColor: '#ffffff'
   },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center'
-  },
-  button: {
-    height: 36,
-    backgroundColor: '#f4a460',
-    borderColor: '#D3D3D3',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
-  },
-  preview: {
+  photoContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    height: 200,
-    width: 200,
-    margin: 25
+    alignItems: 'center'
   },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#000',
-    padding: 10,
-    margin: 5,
-    fontSize: 12,
-    alignSelf: 'center'
-  },
-  cameraContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 15
-  },
-  cameraButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4a460'
-  },
-  cameraIcon: {
-    marginRight: 5,
-    margin: 5,
-    color: '#FFFFFF'
-  },
-  previewContainer: {
-    flexDirection: 'row'
-  },
-  previewImage: {
-    width: 100,
-    height: 100,
-    marginLeft: 5
+  photoWrapper: {
+    borderWidth: 1,
+    borderColor: 'black',
+    marginRight: 5
   }
 })
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
     loading: state.pet.isRegistering,
     user: state.auth.isAuthenticated ? state.auth.user.providerData[0] : {}

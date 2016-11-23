@@ -30,7 +30,6 @@ export function loginFaceBook() {
         }
     },
     error => {
-      console.log(error.toString())
       Alert.alert('Something went wrong while trying to login2')
     })
   }
@@ -48,7 +47,6 @@ function storeUser(user, provider) {
   userList.set(userData)
   .then(() => {
   }, error => {
-    console.log(error.toString())
     Alert.alert('Something went wrong while trying to store user data')
   })
 }
@@ -56,11 +54,9 @@ function storeUser(user, provider) {
 export function logout() {
   return function(dispatch, getState) {
     auth.signOut().then(() => {
-        console.log('Logged out!')
         LoginManager.logOut()
         dispatch(logoutSuccess())
     }, () => {
-      console.log('Something went wrong')
     })
   }
 }
@@ -71,7 +67,7 @@ export function checkLogin() {
       if (user) {
         dispatch(userAuthenticated(user))
       } else {
-        console.log('No user!!!!')
+
       }
     })
   }

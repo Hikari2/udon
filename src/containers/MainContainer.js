@@ -15,13 +15,18 @@ import MyPostsView from './MyPostsView'
 import NewPostView from './NewPostView'
 import UserView from './UserView'
 
+const headings = ['Search', 'My posts', 'New post', 'User']
+
 class MainContainer extends Component {
 
   render() {
     return (
       <ScrollableTabView
-        renderTabBar={() => <NavigationBar />}
+        renderTabBar={() => <NavigationBar headings={headings}/>}
       >
+      <ScrollView tabLabel='user'>
+        <UserView/>
+      </ScrollView>
         <ScrollView tabLabel='search'>
           <SearchPostsView />
         </ScrollView>
@@ -31,22 +36,10 @@ class MainContainer extends Component {
         <ScrollView tabLabel='plus'>
           <NewPostView/>
         </ScrollView>
-        <ScrollView tabLabel='user'>
-          <UserView/>
-        </ScrollView>
       </ScrollableTabView>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  }
-})
 
 const mapStateToProps = (state) => {
   return {
@@ -56,9 +49,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSubmitPostForm: (post) => {
-      dispatch(publishPost(post))
-    }
+
   }
 }
 

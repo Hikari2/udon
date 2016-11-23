@@ -14,7 +14,8 @@ const FacebookTabBar = React.createClass({
   propTypes: {
     goToPage: React.PropTypes.func,
     activeTab: React.PropTypes.number,
-    tabs: React.PropTypes.array
+    tabs: React.PropTypes.array,
+    headings: React.PropTypes.array
   },
 
   componentDidMount() {
@@ -34,24 +35,25 @@ const FacebookTabBar = React.createClass({
 
   //color between rgb(59,89,152) and rgb(204,204,204)
   iconColor(progress) {
-    const red = 122 + (219 - 122) * progress;
-    const green = 82 + (147 - 82) * progress;
-    const blue = 48 + (86 - 48) * progress;
+    const red = 255 + (125 - 255) * progress;
+    const green = 255 + (64 - 255) * progress;
+    const blue = 255 + (40 - 255) * progress;
     return `rgb(${red}, ${green}, ${blue})`;
   },
 
   render() {
     return(
-      <View>
-        <View style={styles.optionBar}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>{this.props.headings[this.props.activeTab]}</Text>
         </View>
         <View style={[styles.tabs, this.props.style]}>
           {this.props.tabs.map((tab, i) => {
             return <TouchableOpacity key={tab} onPress={() => this.props.goToPage(i)} style={styles.tab}>
               <Icon
                 name={tab}
-                size={30}
-                color={this.props.activeTab === i ? 'rgb(122,82,48)' : 'rgb(219,147,86)'}
+                size={25}
+                color={this.props.activeTab === i ? 'rgb(255,255,255)' : 'rgb(125,64,5)'}
                 ref={(icon) => { this.tabIcons[i] = icon; }}
               />
             </TouchableOpacity>
@@ -63,9 +65,21 @@ const FacebookTabBar = React.createClass({
 });
 
 const styles = StyleSheet.create({
-  optionBar: {
+  container: {
+    elevation: 15,
+    borderBottomWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: 'rgb(247,141,40)'
+  },
+  header: {
+    flex: 1,
     height: 50,
-    backgroundColor: '#7a5230'
+    padding: 10
+  },
+  heading: {
+    color: 'white',
+    fontSize: 21,
+    fontWeight: 'bold'
   },
   tab: {
     flex: 1,
@@ -74,6 +88,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   tabs: {
+    flex: 1,
     height: 45,
     flexDirection: 'row',
     paddingTop: 5,

@@ -3,15 +3,12 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
   Image,
-  ActivityIndicator,
-  TextInput
+  ActivityIndicator
 } from 'react-native'
-import Icon from 'react-native-vector-icons/FontAwesome'
 import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
 import { getAllPosts } from '../actions/post'
+import Card from '../components/Card'
 import countyList from '../constants/county'
 import t from 'tcomb-form-native'
 
@@ -32,7 +29,7 @@ class SearchPostsView extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {this.props.loading ? <ActivityIndicator /> : this.renderPosts()}
+        {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderPosts()}
       </View>
     )
   }
@@ -40,22 +37,16 @@ class SearchPostsView extends Component {
   renderPosts() {
     return (
       this.props.searchResult.map((post, i) => {
-        return(
-          <View style={styles.postContainer} key={`post-${i}`}>
-            <View style={styles.pictureContainer}>
-              {post.photos ? <Image source={{uri: post.photos[0].path}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
-            </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>{post.date}</Text>
-              <Text style={styles.text}>{post.values.heading}</Text>
-              <Text style={styles.text}>{post.values.county}</Text>
-              <Text style={styles.text}>{post.values.type}</Text>
-              <Text style={styles.text}>{post.values.price ? post.values.price + ' SEK' : ' '}</Text>
-            </View>
-          </View>
-        )
-    }))
+        return <Card data={post} key={`post-${i}`}/>
+      })
+    )
   }
+}
+
+SearchPostsView.propTypes = {
+  loading: React.PropTypes.bool,
+  searchResult: React.PropTypes.array,
+  getPosts: React.PropTypes.func
 }
 
 const Form = t.form.Form
@@ -180,7 +171,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     loading: state.post.isSearching,
-    searchResult: state.post.searchResult
+    searchResult: state.post.searchResult,
+    postCount: state.post.searchResult.length
   }
 }
 

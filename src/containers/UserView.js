@@ -4,7 +4,8 @@ import {
   Text,
   View,
   Image,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native'
 import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
@@ -12,14 +13,13 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { logout } from '../actions/auth'
 import { getMyPets } from '../actions/pet'
 
-
 class UserView extends Component {
   constructor(props) {
     super(props)
   }
 
   componentDidMount() {
-    this.props.onLoad()
+    this.props.getMyPets()
   }
 
   render() {
@@ -31,31 +31,31 @@ class UserView extends Component {
           </View>
           <Text style={styles.displayName}>{this.props.displayName}</Text>
         </View>
-        {this.renderMyPets()}
+        {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderMyPets()}
         <View style={styles.optionsContainer}>
           <ScrollView>
             <Icon.Button
               name='plus'
-              backgroundColor='#f4a460'
-              underlayColor='#db9356'
+              underlayColor='grey'
+              backgroundColor='white'
               style={styles.optionButton}
               iconStyle={styles.optionIcon}
               onPress={Actions.newPet}>
               <Text size={16} style={styles.optionText} >
-                New pet profile
+                {'Create new dog profile'}
               </Text>
             </Icon.Button>
           </ScrollView>
           <ScrollView>
             <Icon.Button
               name='close'
-              backgroundColor='#DCDCDC'
-              underlayColor='#B6B6B4'
+              underlayColor='grey'
+              backgroundColor='white'
               style={styles.optionButton}
               iconStyle={styles.optionIcon}
               onPress={this.props.onLogoutClick}>
               <Text size={16} style={styles.optionText} >
-                Logout
+                {'Logout'}
               </Text>
             </Icon.Button>
           </ScrollView>
@@ -70,12 +70,11 @@ class UserView extends Component {
         return(
           <View style={styles.petContainer} key={`pet-${i}`}>
             <View style={styles.pictureContainer}>
-              {pet.photo ? <Image source={{uri: pet.photo.path}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
+              {pet.photo ? <Image source={{uri: pet.photo}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.text}>{'Name: ' + pet.values.name}</Text>
-              <Text style={styles.text}>{'Age: ' + pet.values.age}</Text>
-              <Text style={styles.text}>{'Weight: ' + pet.values.weight + ' kg'}</Text>
+              <Text style={styles.text}>{'Name: ' + pet.name}</Text>
+              <Text style={styles.text}>{'Age: ' + pet.age}</Text>
               <Text style={styles.text}>{'Class: ' + pet.size}</Text>
             </View>
           </View>
@@ -83,6 +82,15 @@ class UserView extends Component {
     }))
   }
 
+}
+
+UserView.propTypes = {
+  getMyPets: React.PropTypes.func,
+  onLogoutClick: React.PropTypes.func,
+  myPets: React.PropTypes.array,
+  displayName: React.PropTypes.string,
+  profilePic: React.PropTypes.string,
+  loading: React.PropTypes.bool
 }
 
 const styles = StyleSheet.create({
@@ -141,13 +149,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 15,
-    marginBottom: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#b2b2b2',
-    borderBottomWidth: 1,
-    borderBottomColor: '#b2b2b2'
+    marginBottom: 10
   },
   pictureContainer: {
     flex: 1,
@@ -168,17 +172,19 @@ const styles = StyleSheet.create({
   }
 })
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
+    loading: state.pet.isSearchingPets,
     displayName: state.auth.isAuthenticated ? state.auth.user.displayName : 'John Doe',
     profilePic: state.auth.isAuthenticated ? state.auth.user.photoURL : ' ',
-    myPets: state.pet.myPets
+    myPets: state.pet.myPets,
+    petCount: state.pet.myPets.length
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onLoad: () => {
+    getMyPets: () => {
       dispatch(getMyPets())
     },
     onLogoutClick: () => {
