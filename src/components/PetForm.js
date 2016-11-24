@@ -6,21 +6,14 @@ import {
   TouchableHighlight
 } from 'react-native'
 import t from 'tcomb-form-native'
-import {getSize} from '../constants/dog'
 import { Actions } from 'react-native-router-flux'
 
 export default class PetForm extends Component {
   constructor(props) {
     super(props)
-    const user = props.user
     this.state = {
-      user: {
-        name: user.displayName,
-        email: user.email
-      },
       value: {
-        type: 'Selling',
-        county: 'Stockholm'
+
       }
     }
   }
@@ -48,7 +41,6 @@ export default class PetForm extends Component {
             if(val) {
               this.props.onSubmit({
                 ...val,
-                size: getSize(val.weight),
                 photo: this.state.photo
               })
               Actions.pop()
@@ -96,8 +88,10 @@ formStyle.textbox = {
 
 const Dog = t.struct({
   name: t.String,
-  age: t.Number,
-  weight: t.Number
+  weight: t.Number,
+  neck: t.Number,
+  back: t.Number,
+  chest: t.Number
 })
 
 const options = {
@@ -106,12 +100,17 @@ const options = {
     name: {
       autoCapitalize: 'sentences'
     },
-    age: {
-
-    }
-    ,
     weight: {
-
+      placeholder: 'kg'
+    },
+    neck: {
+      placeholder: 'cm'
+    },
+    back: {
+      placeholder: 'cm'
+    },
+    chest: {
+      placeholder: 'cm'
     }
   }
 }

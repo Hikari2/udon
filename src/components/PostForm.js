@@ -3,23 +3,27 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableHighlight
+  TouchableHighlight,
+  ScrollView,
+  Image
 } from 'react-native'
 import t from 'tcomb-form-native'
 import countyList from '../constants/county'
+import {productCategory} from '../constants/category'
+import { Actions } from 'react-native-router-flux'
 
 export default class PostForm extends Component {
   constructor(props) {
     super(props)
     const user = props.user
     this.state = {
-      user: {
-        name: user.displayName,
-        email: user.email
-      },
       value: {
+        name: user.displayName,
+        email: user.email,
         type: 'Selling',
-        county: 'Stockholm'
+        county: 'Stockholm',
+        category: 'Other',
+        ...props.post
       }
     }
   }
@@ -34,17 +38,45 @@ export default class PostForm extends Component {
           ref='userForm'
           type={UserForm}
           options={options}
-          value={this.state.user}
+          value={this.state.value}
           onChange={(value) => {
-            this.setState({user: value})
+            this.setState({value})
           }}
         />
         <View style={styles.header}>
           <Text style={{fontSize: 19, fontWeight: '100'}}>Posting content</Text>
         </View>
         <Form
-          ref='form'
-          type={this.state.value.type === 'Selling' ? SellingPost : BuyingPost}
+          ref='postForm'
+          type={PostingForm}
+          options={options}
+          value={this.state.value}
+          onChange={(value) => {
+            this.setState({value})
+          }}
+        />
+        <View style={styles.header}>
+          <Text style={{fontSize: 19, fontWeight: '100'}}>Product detail</Text>
+        </View>
+        {
+          this.props.pets.length > 0 ?
+          <View style={styles.subtitle}>
+            <Text style={{fontSize: 12, fontWeight: '100'}}>{'You can use one of your pet profile'}</Text>
+          </View> :
+          <View/>
+        }
+        <View style={styles.petProfiles}>
+          <ScrollView horizontal>
+          {
+            this.props.pets.map((pet, i) => {
+              return <View style={styles.photoWrapper} key={`pet-${i}`}>{this.petProfile(i, pet.photo)}</View>
+            })
+          }
+          </ScrollView>
+        </View>
+        <Form
+          ref='productForm'
+          type={getFormType(this.state.value.category)}
           options={options}
           value={this.state.value}
           onChange={(value) => {
@@ -56,24 +88,59 @@ export default class PostForm extends Component {
           style={styles.button}
           onPress={()=>{
             const user = this.refs.userForm.getValue()
-            let val = this.refs.form.getValue()
-            if(val && user) {
-              this.props.onSubmit({
+            const post = this.refs.postForm.getValue()
+            const product = this.refs.productForm.getValue()
+            if(user && post && product) {
+              const newPost = {
                 ...user,
-                ...val
-              })
+                ...post,
+                ...product,
+                petProfile: this.state.value.petProfile ? this.state.value.petProfile : {}
+
+              }
+              this.props.post ? newPost.key = this.props.post.key : ''
+              this.props.onSubmit(newPost)
+              if(this.props.post) {
+                Actions.pop()
+              }
             }
           }}
           underlayColor='rgb(0, 191, 255)'>
-          <Text style={styles.buttonText}>Post</Text>
+          <Text style={styles.buttonText}>Submit</Text>
         </TouchableHighlight>
       </View>
+    )
+  }
+
+  petProfile(index, path) {
+    return (
+      <TouchableHighlight onPress={() => {
+        const pet = this.props.pets[index]
+
+        this.setState({
+          value: Object.assign({}, this.state.value, {
+            back: pet.back,
+            chest: pet.chest,
+            neck: pet.neck,
+            weight: pet.weight,
+            petProfile: {
+              name: pet.name,
+              photo: pet.photo
+            }
+          })
+        })
+      }}
+      >
+        <Image source={{uri: path}} style={{height: 100, width: 100}} />
+      </TouchableHighlight>
     )
   }
 }
 
 PostForm.propTypes = {
   user: React.PropTypes.object,
+  post: React.PropTypes.object,
+  pets: React.PropTypes.array,
   onSubmit: React.PropTypes.func,
   children: React.PropTypes.object
 }
@@ -81,6 +148,7 @@ PostForm.propTypes = {
 const Form = t.form.Form
 
 const formStyle = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
+
 formStyle.controlLabel = {
   normal: {
     color: 'rgb(144, 73, 5)',
@@ -109,24 +177,41 @@ const UserForm = t.struct({
   email: t.String
 })
 
-
-
 const Type = t.enums({Selling: 'Selling', Buying: 'Buying'})
 const County = t.enums.of(countyList, 'County')
+const Category = t.enums.of(productCategory, 'Category')
 
-const SellingPost = t.struct({
-  type: Type,
+const PostingForm = t.struct({
+  category: Category,
   heading: t.String,
   description: t.String,
   county: County,
   price: t.Number
 })
 
-const BuyingPost = t.struct({
-  type: Type,
-  heading: t.String,
-  description: t.String,
-  county: County
+const Other = t.struct({
+
+})
+
+const Toys = t.struct({
+
+})
+
+const Cloth = t.struct({
+  neck: t.Number,
+  back: t.Number,
+  chest: t.Number
+})
+
+const Collar = t.struct({
+  weight: t.Number,
+  neck: t.Number
+})
+
+const Harness = t.struct({
+  weight: t.Number,
+  neck: t.Number,
+  chest: t.Number
 })
 
 const options = {
@@ -155,7 +240,34 @@ const options = {
     },
     price: {
 
+    },
+    weight: {
+      placeholder: 'kg'
+    },
+    neck: {
+      placeholder: 'cm'
+    },
+    back: {
+      placeholder: 'cm'
+    },
+    chest: {
+      placeholder: 'cm'
     }
+  }
+}
+
+function getFormType(category) {
+  switch(category) {
+    case 'Toys':
+      return Toys
+    case 'Harness':
+      return Harness
+    case 'Collar':
+      return Collar
+    case 'Cloth':
+      return Cloth
+    default:
+      return Other
   }
 }
 
@@ -175,6 +287,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: 'rgb(250, 180, 114)'
   },
+  subtitle: {
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
+    marginBottom: 10
+  },
   buttonText: {
     fontSize: 18,
     color: 'white',
@@ -189,5 +308,13 @@ const styles = StyleSheet.create({
     margin: 10,
     alignSelf: 'stretch',
     justifyContent: 'center'
+  },
+  petProfiles: {
+    marginBottom: 20
+  },
+  photoWrapper: {
+    borderWidth: 1,
+    borderColor: 'black',
+    marginRight: 5
   }
 })

@@ -10,17 +10,17 @@ import {
 } from 'react-native'
 import { Alert } from 'react-native'
 import { connect } from 'react-redux'
-import {publishPost} from '../actions/post'
+import {updatePost} from '../actions/post'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import PostForm from '../components/PostForm'
 import ImagePicker  from 'react-native-image-picker'
 
-class NewPostView extends Component {
+class EditPostView extends Component {
   constructor(props) {
     super(props)
+    //console.log(JSON.stringify(props.post, null, 2))
     this.state = {
-      camera: false,
-      photos: [{}, {}, {}]
+      photos: props.post.photos
     }
   }
 
@@ -30,33 +30,31 @@ class NewPostView extends Component {
 
   renderForm() {
     return (
-      <View style={styles.container}>
-        <PostForm user={this.props.user} pets={this.props.pets} onSubmit={(post) => {
-          post.photos = this.state.photos
-          this.props.onSubmit(post)
-        }}>
-          <View style={styles.photoContainer}>
-            <ScrollView horizontal>
-            {
-              this.state.photos.map((image, i) => {
-                if(image.path) {
-                  return <View style={styles.photoWrapper} key={`photo-${i}`}>{this.savedPhoto(i, image.path)}</View>
-                } else {
-                  return <View style={styles.photoWrapper} key={`photo-${i}`}>{this.newPhoto(i)}</View>
-                }
-              })
-            }
-            </ScrollView>
-          </View>
-        </PostForm>
-      </View>
+      <ScrollView>
+        <View style={styles.container}>
+          <PostForm user={this.props.user} pets={this.props.pets} post={this.props.post} onSubmit={(post) => {
+            post.photos = this.state.photos
+            this.props.onSubmit(post)
+          }}>
+            <View style={styles.photoContainer}>
+              <ScrollView horizontal>
+              {
+                this.state.photos.map((image, i) => {
+                  return <View style={styles.photoWrapper} key={`photo-${i}`}>{this.savedPhoto(i, image)}</View>
+                })
+              }
+              </ScrollView>
+            </View>
+          </PostForm>
+        </View>
+      </ScrollView>
     )
   }
 
-  savedPhoto(index, path) {
+  savedPhoto(index, image) {
     return (
       <TouchableHighlight onPress={() => this.addPhoto(index)}>
-        <Image source={{uri: path}} style={{height: 100, width: 100}} />
+        <Image source={{uri: image.path}} style={{height: 100, width: 100}} />
       </TouchableHighlight>
     )
   }
@@ -100,7 +98,8 @@ class NewPostView extends Component {
   }
 }
 
-NewPostView.propTypes = {
+EditPostView.propTypes = {
+  post: React.PropTypes.object,
   loading: React.PropTypes.bool,
   user: React.PropTypes.object,
   pets: React.PropTypes.array,
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff'
   },
   photoContainer: {
-    marginTop: 40
+
   },
   photoWrapper: {
     borderWidth: 1,
@@ -138,8 +137,9 @@ const styles = StyleSheet.create({
   }
 })
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
   return {
+    post: ownProps.post,
     loading: state.post.isPublishing,
     user: state.auth.isAuthenticated ? state.auth.user.providerData[0] : {},
     pets: state.pet.myPets
@@ -149,7 +149,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onSubmit: (post) => {
-      dispatch(publishPost(post))
+      dispatch(updatePost(post))
     }
   }
 }
@@ -157,4 +157,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(NewPostView)
+)(EditPostView)

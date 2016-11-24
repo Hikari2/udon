@@ -2,6 +2,9 @@ import {
   PUBLISH_REQUEST,
   PUBLISH_SUCCESS,
   PUBLISH_FAILURE,
+  UPDATE_REQUEST,
+  UPDATE_SUCCESS,
+  UPDATE_FAILURE,
   SEARCH_OWN_REQUEST,
   SEARCH_OWN_SUCCESS,
   SEARCH_OWN_FAILURE,
@@ -13,6 +16,7 @@ import {
 const post = (
   state = {
     isPublishing: false,
+    isUpdating: false,
     isSearching: false,
     isSearchingOwn: false,
     error: '',
@@ -33,6 +37,22 @@ const post = (
     case PUBLISH_FAILURE: {
       return Object.assign({}, state, {
         isPublishing: false,
+        error: action.error
+      })
+    }
+    case UPDATE_REQUEST: {
+      return Object.assign({}, state, {
+        isUpdating: true
+      })
+    }
+    case UPDATE_SUCCESS: {
+      return Object.assign({}, state, {
+        isUpdating: false
+      })
+    }
+    case UPDATE_FAILURE: {
+      return Object.assign({}, state, {
+        isUpdating: false,
         error: action.error
       })
     }

@@ -29,7 +29,10 @@ class UserView extends Component {
           <View style={styles.pictureWrapper}>
             <Image source={{uri: this.props.profilePic}} style={styles.profilePic} />
           </View>
-          <Text style={styles.displayName}>{this.props.displayName}</Text>
+          <View style={styles.profileWrapper}>
+            <Text style={styles.profileText}>{this.props.displayName}</Text>
+            <Text style={styles.profileText}>{this.props.email}</Text>
+          </View>
         </View>
         {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderMyPets()}
         <View style={styles.optionsContainer}>
@@ -74,8 +77,12 @@ class UserView extends Component {
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.text}>{'Name: ' + pet.name}</Text>
-              <Text style={styles.text}>{'Age: ' + pet.age}</Text>
-              <Text style={styles.text}>{'Class: ' + pet.size}</Text>
+              <View style={styles.measurements}>
+                <Text style={styles.text}>{'Weight: ' + pet.weight + ' kg'}</Text>
+                <Text style={styles.text}>{'Neck: ' + pet.neck + ' cm'}</Text>
+                <Text style={styles.text}>{'Back: ' + pet.back+ ' cm'}</Text>
+                <Text style={styles.text}>{'Chest: ' + pet.chest+ ' cm'}</Text>
+              </View>
             </View>
           </View>
         )
@@ -89,6 +96,7 @@ UserView.propTypes = {
   onLogoutClick: React.PropTypes.func,
   myPets: React.PropTypes.array,
   displayName: React.PropTypes.string,
+  email: React.PropTypes.string,
   profilePic: React.PropTypes.string,
   loading: React.PropTypes.bool
 }
@@ -101,8 +109,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF'
   },
   profileContainer: {
+    flexDirection: 'row',
     justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 10,
     paddingLeft: 30,
     backgroundColor: '#D3D3D3'
@@ -118,9 +127,10 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50
   },
-  displayName: {
-    marginTop: 10,
-    textAlign: 'center',
+  profileWrapper: {
+    padding: 25
+  },
+  profileText: {
     fontSize: 14,
     fontWeight: 'bold',
     fontFamily: 'Helvetica',
@@ -161,6 +171,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center'
   },
+  measurements: {
+    borderTopWidth: 1,
+    borderTopColor: 'grey',
+    marginTop: 8,
+  },
   text: {
     color: '#2B3856',
     fontSize: 16,
@@ -176,6 +191,7 @@ const mapStateToProps = (state) => {
   return {
     loading: state.pet.isSearchingPets,
     displayName: state.auth.isAuthenticated ? state.auth.user.displayName : 'John Doe',
+    email: state.auth.isAuthenticated ? state.auth.user.email : ' ',
     profilePic: state.auth.isAuthenticated ? state.auth.user.photoURL : ' ',
     myPets: state.pet.myPets,
     petCount: state.pet.myPets.length

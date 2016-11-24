@@ -1,10 +1,4 @@
 import React, { Component } from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableHighlight
-} from 'react-native'
 import { createStore, applyMiddleware  } from 'redux'
 import thunk from 'redux-thunk'
 import { Provider, connect } from 'react-redux'
@@ -13,6 +7,8 @@ import reducer from './reducers'
 import LoginPage from './containers/LoginPage'
 import MainContainer from './containers/MainContainer'
 import NewPetView from './containers/NewPetView'
+import EditPostView from './containers/EditPostView'
+import PostDetailView from './containers/PostDetailView'
 
 let store = createStore(
   reducer,
@@ -45,6 +41,14 @@ export default class udon extends Component {
                 key='newPet'
                 component={NewPetView}
               />
+              <Scene
+                key='editPost'
+                component={EditPostView}
+              />
+              <Scene
+                key='postDetail'
+                component={PostDetailView}
+              />
             </Scene>
           </Scene>
         </Router>
@@ -52,12 +56,3 @@ export default class udon extends Component {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  }
-})

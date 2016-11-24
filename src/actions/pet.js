@@ -42,9 +42,11 @@ export function registerPet(pet) {
     const photo = pet.photo
     pet = {
       uid: getState().auth.user.uid,
-      age: pet.age,
       name: pet.name,
-      size: pet.size
+      weight: pet.weight,
+      neck: pet.neck,
+      back: pet.back,
+      chest: pet.chest,
     }
 
     const key = firebase.database().ref('pet_list').push().key
@@ -88,17 +90,19 @@ export function getMyPets() {
     const uid = getState().auth.user.uid
     const postList = firebase.database().ref('pet_list').orderByChild('uid').equalTo(uid)
     postList.on('value', (snap) => {
-      if(!snap.val())
+      if(!snap.val() || getState().pet.isRegistering) {
         dispatch(searchPetsSuccess([]))
-      var items = []
-      snap.forEach((child) => {
-        const key = child.key
-        readImage(key, 0).then((photo)=> {
-          items.push(Object.assign({}, child.val(), {photo}, {key: child.key}))
-          items.reverse()
-          dispatch(searchPetsSuccess(items))
+      } else {
+        var items = []
+        snap.forEach((child) => {
+          const key = child.key
+          readImage(key, 0).then((photo)=> {
+            items.push(Object.assign({}, child.val(), {photo}, {key: child.key}))
+            items.reverse()
+            dispatch(searchPetsSuccess(items))
+          })
         })
-      })
+      }
     }, error => {
       dispatch(searchPetsFailure(error))
     })

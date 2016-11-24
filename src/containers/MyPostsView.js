@@ -7,6 +7,7 @@ import {
 import { connect } from 'react-redux'
 import {getMyPosts} from '../actions/post'
 import Card from '../components/Card'
+import { Actions } from 'react-native-router-flux'
 
 class MyPostsView extends Component {
   constructor(props) {
@@ -28,7 +29,11 @@ class MyPostsView extends Component {
   renderPosts() {
     return (
       this.props.myPosts.map((post, i) => {
-        return <Card data={post} key={`post-${i}`}/>
+        return <Card data={post}
+                key={`post-${i}`}
+                onPress={()=> {
+                  Actions.editPost({post: post})
+                }}/>
       })
     )
   }
@@ -52,7 +57,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    loading: state.post.isSearchingOwn,
+    loading: state.post.isSearchingOwn || state.post.isUpdating,
     myPosts: state.post.myPosts,
     postCount: state.post.myPosts.length
   }
