@@ -3,14 +3,11 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableHighlight
+  Image
 } from 'react-native'
 import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
 import Icon from 'react-native-vector-icons/FontAwesome'
-import { LoginManager, AccessToken, LoginButton} from 'react-native-fbsdk'
 import { loginFaceBook, checkLogin } from '../actions/auth'
-import { logout } from '../actions/auth'
 
 class LoginPage extends Component {
   constructor(props) {
@@ -24,42 +21,47 @@ class LoginPage extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Icon.Button name="facebook" backgroundColor="#3b5998" onPress={this.props.faceBookLogin}>
-          Login with Facebook
-        </Icon.Button>
+        <Image source={require('../assets/logo_fade.jpg')} style={{height: 125, width: 125}} />
+        <View style={styles.buttonContainer}>
+          <Icon.Button name="facebook" backgroundColor="#3b5998" style={styles.button} onPress={this.props.faceBookLogin}>
+            Login with Facebook
+          </Icon.Button>
+        </View>
       </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 25
+  },
   button: {
     padding:10,
     height:45,
     overflow:'hidden',
-    borderRadius:4,
-    backgroundColor: 'lightblue'
+    borderRadius: 0,
   },
   button_text: {
     fontSize: 20,
     color: 'white'
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   }
 })
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   return {
     isAuthenticated: state.auth.isAuthenticated
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  //dispatch(logout())
   return {
     onLoad: () => {
       dispatch(checkLogin())

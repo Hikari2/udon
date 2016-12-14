@@ -3,8 +3,6 @@ import {
   StyleSheet,
   View,
   ActivityIndicator,
-  TouchableHighlight,
-  Text
 } from 'react-native'
 import { connect } from 'react-redux'
 import { getPosts } from '../actions/post'
@@ -13,6 +11,7 @@ import countyList from '../constants/county'
 import t from 'tcomb-form-native'
 import { Actions } from 'react-native-router-flux'
 import {productCategory} from '../constants/category'
+import Add from '../components/Add'
 
 const def = {
   keyword: '',
@@ -68,15 +67,16 @@ class SearchPostsView extends Component {
   }
 
   renderPosts() {
-    return(
-      this.props.searchResult.map((post, i) => {
-        return <Card data={post}
-                key={`post-${i}`}
-                onPress={()=> {
-                  Actions.postDetail({post: post})
-                }}/>
-      })
-    )
+    let posts = this.props.searchResult.map((post, i) => {
+      return <Card
+              data={post}
+              key={`post-${i}`}
+              onPress={()=> {
+                Actions.postDetail({post: post})
+              }}/>
+          })
+    posts.push(<Add key={'add'}/>)
+    return posts
   }
 }
 

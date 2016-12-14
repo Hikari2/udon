@@ -30,7 +30,7 @@ export default class udon extends Component {
             tabs={true}
             unmountScenes
             selector={props=>props.isAuthenticated ? 'main' : 'loginPage'}>
-            <Scene key='loginPage' component={LoginPage} title=' ' />
+            <Scene key='loginPage' component={LoginPage} hideNavBar title=' ' />
             <Scene key='main'>
               <Scene
                 key='mainContainer'

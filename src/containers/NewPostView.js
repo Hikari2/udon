@@ -118,7 +118,7 @@ const options = {
     skipBackup: true,
     path: 'images'
   }
-};
+}
 
 const styles = StyleSheet.create({
   container: {
