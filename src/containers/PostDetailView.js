@@ -18,7 +18,7 @@ class PostDetailView extends Component {
       <ScrollView>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={{fontSize: 19, fontWeight: '100'}}>{this.props.post.heading}</Text>
+            <Text style={{fontSize: 19, fontWeight: '600'}}>{this.props.post.heading}</Text>
           </View>
           <View style={styles.photoContainer}>
             <ScrollView horizontal>
@@ -42,7 +42,7 @@ class PostDetailView extends Component {
             <Text style={styles.normalText}>{this.props.post.description}</Text>
           </View>
           <View style={styles.header}>
-            <Text style={{fontSize: 19, fontWeight: '100'}}>Poster</Text>
+            <Text style={{fontSize: 19, fontWeight: '600'}}>Poster</Text>
           </View>
           <View style={styles.textContainer}>
             <Text style={styles.normalText}>{this.props.post.name}</Text>
@@ -50,10 +50,10 @@ class PostDetailView extends Component {
             <Text style={styles.normalText}>{this.props.post.county}</Text>
           </View>
           <View style={styles.header}>
-            <Text style={{fontSize: 19, fontWeight: '100'}}>Profile used</Text>
+            <Text style={{fontSize: 19, fontWeight: '600'}}>Profile used</Text>
           </View>
           {
-            this.props.post.petProfile.name ?
+            this.props.post.petProfile ?
               <View style={styles.petProfile}>
                 <View style={styles.photoContainer}>
                   <View style={styles.photoWrapper}>

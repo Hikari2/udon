@@ -5,7 +5,8 @@ import {
   View,
   Image,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableHighlight
 } from 'react-native'
 import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
@@ -73,20 +74,32 @@ class UserView extends Component {
     return (
       this.props.myPets.map((pet, i) => {
         return(
-          <View style={styles.petContainer} key={`pet-${i}`}>
-            <View style={styles.pictureContainer}>
-              {pet.photo ? <Image source={{uri: pet.photo}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
-            </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>{'Name: ' + pet.name}</Text>
-              <View style={styles.measurements}>
-                <Text style={styles.text}>{'Weight: ' + pet.weight + ' kg'}</Text>
-                <Text style={styles.text}>{'Neck: ' + pet.neck + ' cm'}</Text>
-                <Text style={styles.text}>{'Back: ' + pet.back+ ' cm'}</Text>
-                <Text style={styles.text}>{'Chest: ' + pet.chest+ ' cm'}</Text>
+          <TouchableHighlight key={`pet-${i}`} onPress={() => {Actions.editPet({data: pet})}}>
+            <View style={styles.petContainer}>
+              <View style={styles.pictureContainer}>
+                {pet.photo ? <Image source={{uri: pet.photo}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={{fontSize: 16, fontWeight: '600'}}>{'Name: '}
+                  <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.name}</Text>
+                </Text>
+                <View style={styles.measurements}>
+                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Weight: '}
+                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.weight + ' kg'}</Text>
+                  </Text>
+                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Neck: '}
+                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.neck + ' cm'}</Text>
+                  </Text>
+                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Back: '}
+                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.back + ' cm'}</Text>
+                  </Text>
+                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Chest: '}
+                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.chest + ' cm'}</Text>
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          </TouchableHighlight>
         )
     }))
   }
@@ -133,8 +146,8 @@ const styles = StyleSheet.create({
     padding: 25
   },
   profileText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     fontFamily: 'Helvetica',
     color: '#FFFFFF'
   },
@@ -157,13 +170,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica'
   },
   petContainer: {
-    width: 320,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 15,
-    marginBottom: 10
+    marginBottom: 10,
+    borderBottomWidth: 0.5,
+    borderColor: 'rgb(232,232,232)'
   },
   pictureContainer: {
     flex: 1,

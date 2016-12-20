@@ -1,6 +1,7 @@
 import * as firebase from 'firebase'
 import RNFetchBlob from 'react-native-fetch-blob'
 import { Alert } from 'react-native'
+import { Actions } from 'react-native-router-flux'
 
 export const REGISTER_PET_REQUEST = 'REGISTER_PET_REQUEST'
 export const REGISTER_PET_SUCCESS = 'REGISTER_PET_SUCCESS'
@@ -32,7 +33,8 @@ function readImage(key, name) {
     .getDownloadURL().then((url) => {
       return url
     }, error => {
-      Alert.alert('Something went wrong while trying to read pet image')
+      console.log(error)
+      //Alert.alert('Something went wrong while trying to read pet image')
     })
 }
 
@@ -50,14 +52,17 @@ export function registerPet(pet) {
     }
 
     const key = firebase.database().ref('pet_list').push().key
-    postImage(key, 0, photo.path).then(()=>{
-      firebase.database().ref('pet_list/' + key).update(pet).then(()=>{
-        dispatch(registerSuccess())
+    postImage(key, 0, photo.path)
+      .then(() => {
+        firebase.database().ref('pet_list/' + key).set(pet)
+          .then(() => {
+            dispatch(registerSuccess())
+            Actions.mainContainer()
+          })
+      }, error => {
+        dispatch(registerFailure(error))
+        Alert.alert('Something went wrong while trying to register your pet')
       })
-    }, error => {
-      dispatch(registerFailure(error))
-      Alert.alert('Something went wrong while trying to register your pet')
-    })
   }
 }
 
@@ -90,7 +95,7 @@ export function getMyPets() {
     const uid = getState().auth.user.uid
     const postList = firebase.database().ref('pet_list').orderByChild('uid').equalTo(uid)
     postList.on('value', (snap) => {
-      if(!snap.val() || getState().pet.isRegistering) {
+      if(!snap.val()) {
         dispatch(searchPetsSuccess([]))
       } else {
         var items = []
@@ -125,6 +130,60 @@ export function searchPetsSuccess(pets) {
 export function searchPetsFailure(message) {
   return {
     type: SEARCH_PETS_FAILURE,
+    error: message
+  }
+}
+
+export const UPDATE_PET_REQUEST = 'UPDATE_PET_REQUEST'
+export const UPDATE_PET_SUCCESS = 'UPDATE_PET_SUCCESS'
+export const UPDATE_PET_FAILURE = 'UPDATE_PET_FAILURE'
+
+export function updatePet(pet) {
+  return function(dispatch, getState) {
+    dispatch(requestUpdate())
+    console.log(pet)
+    const photo = pet.photo
+    const key = pet.key
+    pet = {
+      uid: getState().auth.user.uid,
+      name: pet.name,
+      weight: pet.weight,
+      neck: pet.neck,
+      back: pet.back,
+      chest: pet.chest,
+    }
+
+    let promises = []
+    if(!photo.path.includes('http')) {
+      promises.push(postImage(key, 0, photo.path))
+    }
+    promises.push(firebase.database().ref('pet_list/' + key).update(pet))
+
+    Promise.all(promises).then(() => {
+      dispatch(updateSuccess())
+      Actions.mainContainer()
+    }, error => {
+      dispatch(updateFailure(error))
+      Alert.alert('Something went wrong while trying to update your pet')
+    })
+  }
+}
+
+export function requestUpdate() {
+  return {
+    type: UPDATE_PET_REQUEST
+  }
+}
+
+export function updateSuccess() {
+  return {
+    type: UPDATE_PET_SUCCESS
+  }
+}
+
+export function updateFailure(message) {
+  return {
+    type: UPDATE_PET_FAILURE,
     error: message
   }
 }

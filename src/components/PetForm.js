@@ -13,7 +13,7 @@ export default class PetForm extends Component {
     super(props)
     this.state = {
       value: {
-
+        ...props.pet
       }
     }
   }
@@ -41,6 +41,7 @@ export default class PetForm extends Component {
             if(val) {
               this.props.onSubmit({
                 ...val,
+                key: this.props.pet.key,
                 photo: this.state.photo
               })
               Actions.pop()

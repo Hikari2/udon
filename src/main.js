@@ -7,6 +7,7 @@ import reducer from './reducers'
 import LoginPage from './containers/LoginPage'
 import MainContainer from './containers/MainContainer'
 import NewPetView from './containers/NewPetView'
+import EditPetView from './containers/EditPetView'
 import EditPostView from './containers/EditPostView'
 import PostDetailView from './containers/PostDetailView'
 
@@ -40,6 +41,10 @@ export default class udon extends Component {
               <Scene
                 key='newPet'
                 component={NewPetView}
+              />
+              <Scene
+                key='editPet'
+                component={EditPetView}
               />
               <Scene
                 key='editPost'
