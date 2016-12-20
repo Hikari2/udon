@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import {
   StyleSheet,
+  Dimensions,
   View,
   ActivityIndicator,
 } from 'react-native'
@@ -18,6 +19,7 @@ const def = {
   county: 'Stockholm',
   category: 'Cloth'
 }
+const {width} = Dimensions.get('window')
 
 class SearchPostsView extends Component {
   constructor(props) {
@@ -75,7 +77,7 @@ class SearchPostsView extends Component {
                 Actions.postDetail({post: post})
               }}/>
           })
-    posts.push(<Add key={'add'}/>)
+    posts.push(<Add width={width - 20} key={'add'}/>)
     return posts
   }
 }
@@ -163,7 +165,6 @@ const styles = StyleSheet.create({
     marginBottom: 5
   },
   postContainer: {
-    width: 320,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',

@@ -1,6 +1,7 @@
 import * as firebase from 'firebase'
 import RNFetchBlob from 'react-native-fetch-blob'
 import { Alert } from 'react-native'
+import { Actions } from 'react-native-router-flux'
 
 export const PUBLISH_REQUEST = 'PUBLISH_REQUEST'
 export const PUBLISH_SUCCESS = 'PUBLISH_SUCCESS'
@@ -68,6 +69,7 @@ export function publishPost(post) {
     })
     Promise.all(promises).then(() => {
       firebase.database().ref('post_list/' + key).update(post).then(()=>{
+        Alert.alert('Successfully created post')
         dispatch(publishSuccess())
       })
     }, error => {
@@ -114,10 +116,13 @@ export function updatePost(post) {
 
     firebase.database().ref('post_list/' + post.key).update(post).then(() => {
       const promises = photos.map((photo, index) => {
-        return updateImage(photo.key, index, photo.path)
+        if(!photo.path.includes('http')) {
+          return updateImage(photo.key, index, photo.path)
+        }
       })
       Promise.all(promises).then(() => {
         dispatch(updateSuccess())
+        Actions.mainContainer()
       })
     }, error => {
       dispatch(updateFailure(error))

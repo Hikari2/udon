@@ -6,8 +6,8 @@ import {
 } from 'react-native'
 
 const images = [
-  require('../assets/1.png'),
-  require('../assets/2.png')
+  require('../assets/1.jpg'),
+  require('../assets/2.jpg')
 ]
 
 export default class Add extends Component {
@@ -18,14 +18,10 @@ export default class Add extends Component {
   render() {
     const rand = Math.floor((Math.random() * 2))
     return (
-      <View style={styles.container}>
-        <View style={styles.pictureContainer}>
-          <Image
-            resizeMode='contain'
-            source={images[rand]}
-            style={styles.picture} />
-        </View>
-      </View>
+      <Image
+        resizeMode='cover'
+        source={images[rand]}
+        style={{height: 100, width: this.props.width}} />
     )
   }
 }
@@ -49,8 +45,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   picture: {
-    flex: 1,
-    height: 150,
-    width: 400
+    height: 125
   }
 })

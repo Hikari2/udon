@@ -25,11 +25,11 @@ export default class Card extends Component {
                 <Text>No Image</Text>}
             </View>
             <View style={styles.textContainer}>
-              <Text style={{fontSize: 20, fontWeight: 'bold', fontFamily: 'sans-serif'}}>{this.props.data.heading}</Text>
-              <Text style={{fontSize: 20, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.category}</Text>
-              <Text style={{fontSize: 16, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.date}</Text>
-              <Text style={{fontSize: 16, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.county}</Text>
-              <Text style={{fontSize: 16, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.price ?
+              <Text style={{fontSize: 18, fontWeight: 'bold', fontFamily: 'sans-serif'}}>{this.props.data.heading}</Text>
+              <Text style={{fontSize: 18, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.category}</Text>
+              <Text style={{fontSize: 14, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.date}</Text>
+              <Text style={{fontSize: 14, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.county}</Text>
+              <Text style={{fontSize: 14, fontWeight: '100', fontFamily: 'sans-serif'}}>{this.props.data.price ?
                 this.props.data.price + ' :-' : ' '}</Text>
             </View>
           </View>
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    borderTopWidth: 1,
-    borderTopColor: '#b2b2b2'
+    borderBottomWidth: 1,
+    borderBottomColor: '#b2b2b2'
   },
   pictureContainer: {
     flex: 1,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     justifyContent: 'center',
-    padding: 15
+    padding: 5
   },
   picture: {
     flex: 1,

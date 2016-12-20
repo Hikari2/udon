@@ -26,13 +26,15 @@ class UserView extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.profileContainer}>
-          <View style={styles.pictureWrapper}>
-            <Image source={{uri: this.props.profilePic}} style={styles.profilePic} />
-          </View>
-          <View style={styles.profileWrapper}>
-            <Text style={styles.profileText}>{this.props.displayName}</Text>
-            <Text style={styles.profileText}>{this.props.email}</Text>
-          </View>
+          <ScrollView horizontal>
+            <View style={styles.pictureWrapper}>
+              <Image source={{uri: this.props.profilePic}} style={styles.profilePic} />
+            </View>
+            <View style={styles.profileWrapper}>
+              <Text style={styles.profileText}>{this.props.displayName}</Text>
+              <Text style={styles.profileText}>{this.props.email}</Text>
+            </View>
+          </ScrollView>
         </View>
         {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderMyPets()}
         <View style={styles.optionsContainer}>
