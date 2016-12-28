@@ -7,7 +7,7 @@ import {
   TouchableHighlight
 } from 'react-native'
 
-export default class Card extends Component {
+export default class MyPostPanel extends Component {
   constructor(props) {
     super(props)
   }
@@ -39,7 +39,7 @@ export default class Card extends Component {
   }
 }
 
-Card.propTypes = {
+MyPostPanel.propTypes = {
   width: React.PropTypes.number,
   onPress: React.PropTypes.func,
   data: React.PropTypes.shape({
@@ -53,7 +53,7 @@ Card.propTypes = {
 
 const styles = StyleSheet.create({
   container: {
-    height: 125,
+    height: 67,
     flexDirection: 'row',
     padding: 7,
     borderBottomWidth: 0.4,

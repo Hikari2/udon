@@ -2,272 +2,413 @@ import React, { Component } from 'react'
 import {
   StyleSheet,
   Text,
+  Image,
+  Platform,
   View,
-  TouchableHighlight,
   ScrollView,
-  Image
+  TouchableHighlight
 } from 'react-native'
 import t from 'tcomb-form-native'
 import countyList from '../constants/county'
 import {productCategory} from '../constants/category'
-import { Actions } from 'react-native-router-flux'
+import Icon from 'react-native-vector-icons/FontAwesome'
+import ImagePicker  from 'react-native-image-picker'
 
 export default class PostForm extends Component {
   constructor(props) {
     super(props)
-    const user = props.user
+    let photos
+    if (props.post.photos) {
+      photos = new Array(3 - props.post.photos.length)
+      photos.fill({})
+    }
     this.state = {
-      value: {
-        name: user.displayName,
-        email: user.email,
-        type: 'Selling',
+      pets: props.pets,
+      petIndex: -1,
+      photos: props.post.photos ? props.post.photos.concat(photos) : [{}, {}, {}],
+      contact: {
         county: 'Stockholm',
+        phone: props.post.phone ? props.post.phone : '',
+        postal: props.post.postal ? props.post.postal : ''
+      },
+      post: {
         category: 'Other',
-        ...props.post
+        heading: props.post.heading ? props.post.heading : '',
+        description: props.post.description ? props.post.description : '',
+        price: props.post.price ? props.post.price : '',
+        sendable: 'No'
       }
     }
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={{fontSize: 19, fontWeight: '100'}}>Personal information</Text>
+      <View style={[styles.container, {width: this.props.width * 0.95}]}>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>Contact Information</Text>
         </View>
         <Form
-          ref='userForm'
-          type={UserForm}
+          ref='contact'
+          type={Contact}
           options={options}
-          value={this.state.value}
-          onChange={(value) => {
-            this.setState({value})
+          value={this.state.contact}
+          onChange={(contact) => {
+            this.setState({contact})
           }}
         />
-        <View style={styles.header}>
-          <Text style={{fontSize: 19, fontWeight: '100'}}>Posting content</Text>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>Your advert</Text>
         </View>
         <Form
-          ref='postForm'
-          type={PostingForm}
+          ref='post'
+          type={Post}
           options={options}
-          value={this.state.value}
-          onChange={(value) => {
-            this.setState({value})
+          value={this.state.post}
+          onChange={(post) => {
+            this.setState({post})
           }}
         />
-        <View style={styles.header}>
-          <Text style={{fontSize: 19, fontWeight: '100'}}>Product detail</Text>
-        </View>
         {
-          this.props.pets.length > 0 ?
-          <View style={styles.subtitle}>
-            <Text style={{fontSize: 12, fontWeight: '100'}}>{'You can use one of your pet profile'}</Text>
-          </View> :
-          <View/>
+          this.props.pets ?
+            <View>
+              <View style={styles.headingContainer}>
+                <Text style={styles.heading}>Add previous user</Text>
+              </View>
+              <View style={styles.pets}>
+                <ScrollView horizontal>
+                {
+                  this.props.pets.map((pet, i) => {
+                    let borderColor = 'rgb(181,181,181)'
+                    if (i === this.state.petIndex) {
+                      borderColor = 'rgb(109, 214, 224)'
+                    }
+
+                    if(pet.photo) {
+                      return (
+                        <TouchableHighlight
+                          key={`pet-${i}`}
+                          style={styles.photoWrapper}
+                          underlayColor={'rgb(228,228,228)'}
+                          onPress={() => this.selectPet(i)}>
+                            <Image source={{uri: pet.photo.url}} style={[styles.photoContainer, {borderColor}]} />
+                        </TouchableHighlight>
+                      )
+                    } else {
+                      return (
+                        <TouchableHighlight
+                          key={`pet-${i}`}
+                          style={[styles.photoWrapper, {borderColor}]}
+                          underlayColor={'rgb(228,228,228)'}
+                          onPress={() => this.selectPet(i)}>
+                          <View style={[styles.photoContainer, {borderColor}]}>
+                            <Icon
+                              name={'paw'}
+                              size={35}
+                              underlayColor='grey'
+                              />
+                            <Text>{pet.name}</Text>
+                          </View>
+                        </TouchableHighlight>
+                      )
+                    }
+                  })
+                }
+                </ScrollView>
+              </View>
+            </View> : <View/>
         }
-        <View style={styles.petProfiles}>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>Add pictures</Text>
+        </View>
+        <View style={styles.photos}>
           <ScrollView horizontal>
           {
-            this.props.pets.map((pet, i) => {
-              return <View style={styles.photoWrapper} key={`pet-${i}`}>{this.petProfile(i, pet.photo)}</View>
+            this.state.photos.map((image, i) => {
+              if(image.url) {
+                return <View style={styles.photoWrapper} key={`photo-${i}`}>{this.savedPhoto(i, image.url)}</View>
+              } else {
+                return <View style={styles.photoWrapper} key={`photo-${i}`}>{this.newPhoto(i)}</View>
+              }
             })
           }
           </ScrollView>
         </View>
-        <Form
-          ref='productForm'
-          type={getFormType(this.state.value.category)}
-          options={options}
-          value={this.state.value}
-          onChange={(value) => {
-            this.setState({value})
-          }}
-        />
-        {this.props.children}
         <TouchableHighlight
           style={styles.button}
           onPress={()=>{
-            const user = this.refs.userForm.getValue()
-            const post = this.refs.postForm.getValue()
-            const product = this.refs.productForm.getValue()
-            if(user && post && product) {
-              const newPost = {
-                ...user,
-                ...post,
-                ...product,
-                petProfile: this.state.value.petProfile ? this.state.value.petProfile : {}
+            const contact = this.refs.contact.getValue()
+            const post = this.refs.post.getValue()
+            const photos = this.state.photos
 
+            if(contact && post) {
+              let result
+              if(this.state.pets && this.state.petIndex !== -1) {
+                let pet = this.state.pets[this.state.petIndex]
+                result = Object.assign({}, post, contact, {photos}, {pet})
               }
-              this.props.post ? newPost.key = this.props.post.key : ''
-              this.props.onSubmit(newPost)
-              if(this.props.post) {
-                Actions.pop()
-              }
+              result = Object.assign({}, post, contact, {photos})
+              this.props.onSubmit(result)
             }
           }}
-          underlayColor='rgb(0, 191, 255)'>
-          <Text style={styles.buttonText}>Submit</Text>
+          underlayColor='rgb(88, 200, 211)'>
+          <Text style={styles.buttonText}>Done</Text>
         </TouchableHighlight>
       </View>
     )
   }
 
-  petProfile(index, path) {
-    return (
-      <TouchableHighlight onPress={() => {
-        const pet = this.props.pets[index]
+  selectPet(index) {
+    if (index !== this.state.petIndex) {
+      this.setState({petIndex: index})
+    } else {
+      this.setState({petIndex: -1})
+    }
+  }
 
-        this.setState({
-          value: Object.assign({}, this.state.value, {
-            back: pet.back,
-            chest: pet.chest,
-            neck: pet.neck,
-            weight: pet.weight,
-            petProfile: {
-              name: pet.name,
-              photo: pet.photo
-            }
-          })
-        })
-      }}
-      >
-        <Image source={{uri: path}} style={{height: 100, width: 100}} />
+  savedPhoto(index, path) {
+    return (
+      <TouchableHighlight
+        underlayColor={'rgb(228,228,228)'}
+        onPress={() => this.addPhoto(index)}>
+          <Image source={{uri: path}} style={styles.photoContainer} />
       </TouchableHighlight>
     )
   }
+
+  newPhoto(index) {
+    return(
+      <TouchableHighlight
+        underlayColor={'rgb(228,228,228)'}
+        onPress={() => this.addPhoto(index)}>
+        <View style={styles.photoContainer}>
+          <Icon
+            name='camera'
+            size={30}
+            color='rgb(106,106,106)'
+            borderRadius={0}
+            backgroundColor='white'
+            iconStyle={{marginRight: 0}}/>
+        </View>
+      </TouchableHighlight>
+    )
+  }
+
+    addPhoto(index) {
+      ImagePicker.showImagePicker(cameraOptions, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker')
+        }
+        else if (response.error) {
+          Alert.alert('Whops! something went wrong')
+        }
+        else if (response.customButton) {
+          console.log('User tapped custom button: ', response.customButton)
+        }
+        else {
+          let source
+          if(Platform.OS === 'android') {
+            source = response.uri
+          } else {
+            source = response.uri.replace('file://', '')
+          }
+          let photos = this.state.photos
+          photos[index] = {url: source, modified: true}
+          this.setState({photos})
+        }
+      })
+    }
 }
 
 PostForm.propTypes = {
-  user: React.PropTypes.object,
   post: React.PropTypes.object,
   pets: React.PropTypes.array,
+  user: React.PropTypes.object,
+  width: React.PropTypes.number,
   onSubmit: React.PropTypes.func,
   children: React.PropTypes.object
 }
 
-const Form = t.form.Form
+PostForm.defaultProps = {
+  post: {}
+}
 
-const formStyle = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
+const cameraOptions = {
+  title: '',
+  maxWidth: 900,
+  maxHeight: 900,
+  customButtons: [
 
-formStyle.controlLabel = {
-  normal: {
-    color: 'rgb(144, 73, 5)',
-    fontWeight: '100'
-  },
-  error: {
-    color: 'rgb(144, 73, 5)',
-    fontWeight: 'bold'
+  ],
+  storageOptions: {
+    skipBackup: true,
+    path: 'images'
   }
 }
 
-formStyle.textbox = {
-  normal: {
-    fontSize: 18,
-    fontWeight: '100'
-  },
-  error: {
-    fontSize: 18,
-    borderColor: 'red',
-    borderWidth: 1
-  }
-}
-
-const UserForm = t.struct({
-  name: t.String,
-  email: t.String
-})
-
-const Type = t.enums({Selling: 'Selling', Buying: 'Buying'})
 const County = t.enums.of(countyList, 'County')
 const Category = t.enums.of(productCategory, 'Category')
+const Sendable = t.enums.of(['No', 'Yes'], 'Sendable')
 
-const PostingForm = t.struct({
+const Form = t.form.Form
+const Contact = t.struct({
+  county: County,
+  postal: t.maybe(t.Number),
+  phone: t.maybe(t.Number),
+})
+const Post = t.struct({
   category: Category,
   heading: t.String,
   description: t.String,
-  county: County,
-  price: t.Number
+  price: t.Number,
+  sendable: Sendable
 })
 
-const Other = t.struct({
 
-})
-
-const Toys = t.struct({
-
-})
-
-const Cloth = t.struct({
-  neck: t.Number,
-  back: t.Number,
-  chest: t.Number
-})
-
-const Collar = t.struct({
-  weight: t.Number,
-  neck: t.Number
-})
-
-const Harness = t.struct({
-  weight: t.Number,
-  neck: t.Number,
-  chest: t.Number
-})
-
-const options = {
-  stylesheet: formStyle,
-  fields: {
-    name: {
-
-    },
-    email: {
-      editable: false
-    },
-    type: {
-
-    },
-    heading: {
-      autoCapitalize: 'sentences'
-    },
-    description: {
-      numberOfLines: 5,
-      textAlignVertical: 'top',
-      autoCapitalize: 'sentences',
-      multiline: true
-    },
-    county: {
-
-    },
-    price: {
-
-    },
-    weight: {
-      placeholder: 'kg'
-    },
-    neck: {
-      placeholder: 'cm'
-    },
-    back: {
-      placeholder: 'cm'
-    },
-    chest: {
-      placeholder: 'cm'
-    }
+const stylesheet  = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
+stylesheet .controlLabel = {
+  normal: {
+    marginBottom: 5,
+    color: 'rgb(148, 148, 148)',
+    fontWeight: '100'
+  },
+  error: {
+    marginBottom: 5,
+    color: 'rgb(148, 148, 148)',
+    fontWeight: '100'
   }
 }
 
-function getFormType(category) {
-  switch(category) {
-    case 'Toys':
-      return Toys
-    case 'Harness':
-      return Harness
-    case 'Collar':
-      return Collar
-    case 'Cloth':
-      return Cloth
-    default:
-      return Other
+stylesheet.select = {
+  normal: {
+    width: 160,
+    color: 'rgb(148, 148, 148)',
+    borderColor: 'rgb(218, 218, 218)',
+    borderWidth: 0.5
+  },
+  error: {
+    width: 160,
+    color: 'rgb(148, 148, 148)',
+    borderColor: 'red',
+    borderWidth: 0.5
+  }
+}
+
+stylesheet.textbox = {
+  normal: {
+    width: 200,
+    color: 'rgb(148, 148, 148)',
+    fontSize: 14,
+    fontWeight: '100',
+    borderColor: 'rgb(218, 218, 218)',
+    borderWidth: 0.5,
+    marginBottom: 0,
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingLeft: 10,
+    paddingRight: 35
+  },
+  error: {
+    width: 200,
+    color: 'rgb(148, 148, 148)',
+    fontSize: 14,
+    fontWeight: '100',
+    borderColor: 'red',
+    borderWidth: 0.5,
+    marginBottom: 0,
+    paddingTop: 4,
+    paddingBottom: 4,
+    paddingLeft: 10,
+    paddingRight: 35
+  }
+}
+
+const stylesheetLarge  = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
+stylesheetLarge.controlLabel = {
+  normal: {
+    marginBottom: 5,
+    color: 'rgb(148, 148, 148)',
+    fontWeight: '100'
+  },
+  error: {
+    marginBottom: 5,
+    color: 'rgb(148, 148, 148)',
+    fontWeight: '100'
+  }
+}
+
+
+stylesheetLarge.textbox = {
+  normal: {
+    width: 300,
+    textAlignVertical: 'top',
+    color: 'rgb(148, 148, 148)',
+    fontSize: 14,
+    fontWeight: '100',
+    borderColor: 'rgb(218, 218, 218)',
+    borderWidth: 0.5
+  },
+  error: {
+    width: 300,
+    textAlignVertical: 'top',
+    color: 'rgb(148, 148, 148)',
+    fontSize: 14,
+    fontWeight: '100',
+    borderColor: 'red',
+    borderWidth: 0.5
+  }
+}
+
+const options = {
+  fields: {
+    county: {
+      stylesheet,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    phone: {
+      stylesheet,
+      maxLength: 10,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    postal: {
+      stylesheet,
+      label: 'ZIP code (optional)',
+      maxLength: 5,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    category: {
+      stylesheet,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences',
+    },
+    heading: {
+      stylesheet,
+      maxLength: 40,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    description: {
+      stylesheet: stylesheetLarge,
+      multiline: true,
+      numberOfLines: 6,
+      maxLength: 120,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    price: {
+      stylesheet,
+      maxLength: 7,
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
+    sendable: {
+      stylesheet,
+      label: 'Can send',
+      underlineColorAndroid: 'transparent',
+      autoCapitalize: 'sentences'
+    },
   }
 }
 
@@ -279,20 +420,31 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#ffffff'
   },
-  header: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 5,
-    paddingBottom: 5,
-    marginBottom: 15,
-    backgroundColor: 'rgb(250, 180, 114)'
+  headingContainer: {
+    marginTop: 25,
+    marginBottom: 15
   },
-  subtitle: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 5,
-    paddingBottom: 5,
-    marginBottom: 10
+  heading: {
+    fontSize: 21,
+    fontWeight: '600',
+    color: 'rgb(128,128,128)',
+  },
+  pets: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
+  },
+  photos: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  photoContainer: {
+    height: 100,
+    width: 100,
+    marginRight: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2
   },
   buttonText: {
     fontSize: 18,
@@ -300,21 +452,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   button: {
-    elevation: 4,
+    elevation: 1,
     padding: 5,
-    backgroundColor: 'rgb(135, 206, 235)',
+    backgroundColor: 'rgb(109, 214, 224)',
     borderColor: '#D3D3D3',
     borderRadius: 0,
-    margin: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
-  },
-  petProfiles: {
-    marginBottom: 20
-  },
-  photoWrapper: {
-    borderWidth: 1,
-    borderColor: 'black',
-    marginRight: 5
+    marginLeft: 50,
+    marginRight: 50,
+    marginTop: 50
   }
 })

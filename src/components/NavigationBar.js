@@ -66,10 +66,11 @@ const FacebookTabBar = React.createClass({
 
 const styles = StyleSheet.create({
   container: {
-    elevation: 15,
+    elevation: 10,
     borderBottomWidth: 1,
     borderColor: 'transparent',
-    backgroundColor: 'rgb(247,141,40)'
+    backgroundColor: 'rgb(247,141,40)',
+    marginBottom: 5
   },
   header: {
     flex: 1,

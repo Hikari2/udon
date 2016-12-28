@@ -3,79 +3,79 @@ import {
   StyleSheet,
   Platform,
   View,
+  ActivityIndicator,
   TouchableHighlight,
+  Dimensions,
   Image,
-  ScrollView,
-  ActivityIndicator
+  ScrollView
 } from 'react-native'
 import { Alert } from 'react-native'
 import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
-import {updatePet} from '../actions/pet'
+import {update} from '../actions/pet'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import PetForm from '../components/PetForm'
 import ImagePicker  from 'react-native-image-picker'
 
+const { width } = Dimensions.get('window')
+
 class EditPetView extends Component {
   constructor(props) {
     super(props)
-    const bool = props.data.photo !== ''
     this.state = {
-      camera: bool,
-      photo: {path: props.data.photo}
+      key: this.props.data.key,
+      photo: this.props.data.photo
     }
   }
-  render() {
-    return this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderForm()
-  }
 
-  renderForm() {
+  render() {
     return (
       <ScrollView>
-        <View style={styles.container}>
-          <PetForm
-            pet={this.props.data}
-            user={this.props.user}
-            onSubmit={(pet) => {
-              pet.photo = this.state.photo
-              this.props.onSubmit(pet)
-            }}>
-            <View style={styles.photoContainer}>
-            {
-              this.state.photo.path ?
-                <View style={styles.photoWrapper}>{this.savedPhoto(this.state.photo.path)}</View> :
-                <View style={styles.photoWrapper}>{this.newPhoto()}</View>
-            }
-            </View>
-          </PetForm>
-        </View>
+        {
+          this.props.loading ?
+          <ActivityIndicator
+            style={{marginTop: 120, padding: 20, transform: [{scale: 1.7}]}}
+            size={'large'}
+            color={'rgb(247,141,40)'}/> :
+          this.renderData()
+        }
       </ScrollView>
     )
   }
 
-  savedPhoto(path) {
+  renderData() {
     return (
-      <TouchableHighlight onPress={() => this.addPhoto()}>
-        <Image source={{uri: path}} style={{height: 100, width: 100}} />
-      </TouchableHighlight>
-    )
-  }
-
-  newPhoto() {
-    return(
-      <Icon.Button
-        name='camera'
-        size={30}
-        color='black'
-        backgroundColor='white'
-        style={{borderRadius: 0}}
-        iconStyle={{padding: 25, marginRight: 0}}
-        onPress={() => this.addPhoto()} />
+      <View style={styles.container}>
+        <View style={styles.topContainer}>
+          {
+            this.state.photo ?
+            <TouchableHighlight onPress={() => this.addPhoto()}>
+              <Image source={{uri: this.state.photo.url}} style={styles.photoContainer} />
+            </TouchableHighlight> :
+            <Icon.Button
+              name='camera'
+              size={50}
+              color='black'
+              borderRadius={0}
+              backgroundColor='white'
+              iconStyle={{marginRight: 0}}
+              style={styles.photoContainer}
+              onPress={() => {this.addPhoto() }} />
+          }
+        </View>
+        <PetForm
+          width={width}
+          pet={this.props.data}
+          onSubmit={(pet) => {
+              pet.photo = this.state.photo,
+              pet.key = this.state.key
+              this.props.onSubmit(pet)
+            }} />
+      </View>
     )
   }
 
   addPhoto() {
-    ImagePicker.showImagePicker(options, (response) => {
+    ImagePicker.showImagePicker(cameraOptions, (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker')
       }
@@ -89,14 +89,14 @@ class EditPetView extends Component {
         let source
         if(Platform.OS === 'android') {
           source = response.uri
-
-
-
         } else {
           source = response.uri.replace('file://', '')
         }
-        const photo = this.state.photo
-        photo.path = source
+        let photo = this.state.photo
+        if (!photo) {
+          photo = {}
+        }
+        photo = Object.assign({}, photo, {modified: true}, {url: source})
         this.setState({photo})
       }
     })
@@ -109,8 +109,10 @@ EditPetView.propTypes = {
   onSubmit: React.PropTypes.func
 }
 
-const options = {
+const cameraOptions = {
   title: '',
+  maxWidth: 900,
+  maxHeight: 900,
   customButtons: [
 
   ],
@@ -118,38 +120,39 @@ const options = {
     skipBackup: true,
     path: 'images'
   }
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width,
     justifyContent: 'center',
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#ffffff'
+    alignItems: 'center',
+    padding: 15
+  },
+  topContainer: {
+    flexDirection: 'row'
   },
   photoContainer: {
-    flex: 1,
-    alignItems: 'center'
-  },
-  photoWrapper: {
-    borderWidth: 1,
-    borderColor: 'black',
-    marginRight: 5
+    height: width * 0.6,
+    width: width * 0.6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgb(181,181,181)'
   }
 })
 
 const mapStateToProps = (state) => {
   return {
-    loading: state.pet.isRegistering,
-    user: state.auth.isAuthenticated ? state.auth.user.providerData[0] : {}
+    loading: state.pet.isUpdating,
+    user: state.auth.isAuthenticated ? state.auth.user : {}
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     onSubmit: (pet) => {
-      dispatch(updatePet(pet))
+      dispatch(update(pet))
     }
   }
 }

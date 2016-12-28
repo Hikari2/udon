@@ -10,7 +10,10 @@ import {
   SEARCH_OWN_FAILURE,
   SEARCH_REQUEST,
   SEARCH_SUCCESS,
-  SEARCH_FAILURE
+  SEARCH_FAILURE,
+  REMOVE_REQUEST,
+  REMOVE_SUCCESS,
+  REMOVE_FAILURE
 } from '../actions/post'
 
 const post = (
@@ -19,11 +22,13 @@ const post = (
     isUpdating: false,
     isSearching: false,
     isSearchingOwn: false,
+    isRemoving: false,
     error: '',
     myPosts: [],
     searchResult: []
   }, action) => {
   switch (action.type) {
+
     case PUBLISH_REQUEST: {
       return Object.assign({}, state, {
         isPublishing: true
@@ -40,6 +45,7 @@ const post = (
         error: action.error
       })
     }
+
     case UPDATE_REQUEST: {
       return Object.assign({}, state, {
         isUpdating: true
@@ -56,6 +62,7 @@ const post = (
         error: action.error
       })
     }
+
     case SEARCH_OWN_REQUEST: {
       return Object.assign({}, state, {
         isSearchingOwn: true
@@ -73,6 +80,7 @@ const post = (
         error: action.error
       })
     }
+
     case SEARCH_REQUEST: {
       return Object.assign({}, state, {
         isSearching: true
@@ -90,6 +98,24 @@ const post = (
         error: action.error
       })
     }
+
+    case REMOVE_REQUEST: {
+      return Object.assign({}, state, {
+        isRemoving: true
+      })
+    }
+    case REMOVE_SUCCESS: {
+      return Object.assign({}, state, {
+        isRemoving: false
+      })
+    }
+    case REMOVE_FAILURE: {
+      return Object.assign({}, state, {
+        isRemoving: false,
+        error: action.error
+      })
+    }
+
     default:
       return state
   }

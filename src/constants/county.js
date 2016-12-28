@@ -1,6 +1,6 @@
 export default county = [
   'Norrbotten',
-  'Västerbotten', 
+  'Västerbotten',
   'Jämtland',
   'Västernorrland',
   'Gävleborg',

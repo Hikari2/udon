@@ -12,7 +12,7 @@ const provider = firebase.auth.FacebookAuthProvider
 
 export function loginFaceBook() {
   return function(dispatch) {
-    LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_friends']).then(
+    LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_friends', 'user_website']).then(
       loginResult => {
         if (loginResult.isCancelled) {
           Alert.alert('user canceled')

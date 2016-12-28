@@ -3,22 +3,18 @@ import {
   StyleSheet,
   Dimensions,
   View,
+  Text,
   ActivityIndicator,
 } from 'react-native'
 import { connect } from 'react-redux'
 import { getPosts } from '../actions/post'
-import Card from '../components/Card'
+import PostPanel from '../components/PostPanel'
 import countyList from '../constants/county'
 import t from 'tcomb-form-native'
 import { Actions } from 'react-native-router-flux'
 import {productCategory} from '../constants/category'
 import Add from '../components/Add'
 
-const def = {
-  keyword: '',
-  county: 'Stockholm',
-  category: 'Cloth'
-}
 const {width} = Dimensions.get('window')
 
 class SearchPostsView extends Component {
@@ -26,13 +22,17 @@ class SearchPostsView extends Component {
     super(props)
     this.state = {
       value: {
-        ...def
+
       }
     }
   }
 
   componentDidMount() {
-    this.props.getPosts(def)
+    this.props.getPosts({
+      keyword: '',
+      county: '',
+      category: ''
+    })
   }
 
   render() {
@@ -63,21 +63,32 @@ class SearchPostsView extends Component {
         <View style={styles.petProfileContainer}>
 
         </View>
-        {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderPosts()}
+        <Add width={width - 20} key={'add'}/>
+        {this.props.loading ?
+          <ActivityIndicator
+            style={{marginTop: 40, padding: 20, transform: [{scale: 1.7}]}}
+            size={'large'}
+            color={'rgb(247,141,40)'}/> :
+          this.renderPosts()}
       </View>
     )
   }
 
   renderPosts() {
     let posts = this.props.searchResult.map((post, i) => {
-      return <Card
+      return <PostPanel
               data={post}
               key={`post-${i}`}
+              width={width}
               onPress={()=> {
-                Actions.postDetail({post: post})
+                Actions.viewPost({post})
               }}/>
           })
-    posts.push(<Add width={width - 20} key={'add'}/>)
+    if (posts.length === 0) {
+      posts.push(
+        <Text style={{marginTop: 30, fontSize: 21, color: 'rgb(148,148,148)'}} key={`post-noResult`}>No result</Text>
+      )
+    }
     return posts
   }
 }
@@ -91,9 +102,6 @@ SearchPostsView.propTypes = {
 const Form = t.form.Form
 const formStyle = JSON.parse(JSON.stringify(t.form.Form.stylesheet))
 
-formStyle.fieldset = {
-  flexDirection: 'row'
-}
 formStyle.formGroup.normal.flex = 1
 formStyle.formGroup.error.flex = 1
 
@@ -110,13 +118,30 @@ formStyle.controlLabel = {
 
 formStyle.textbox = {
   normal: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '100'
   },
   error: {
-    fontSize: 18,
+    fontSize: 16,
     borderColor: 'red',
     borderWidth: 1
+  }
+}
+
+formStyle.select = {
+  normal: {
+    width: 180,
+    height: 30,
+    color: 'rgb(148, 148, 148)',
+    borderColor: 'rgb(218, 218, 218)',
+    borderWidth: 0.5
+  },
+  error: {
+    width: 180,
+    height: 30,
+    color: 'rgb(148, 148, 148)',
+    borderColor: 'red',
+    borderWidth: 0.5
   }
 }
 
@@ -137,44 +162,29 @@ const options = {
   auto: 'none',
   fields: {
     keyword: {
-      placeholder: 'search...'
+      placeholder: 'keyword...'
     },
     county: {
-
+      placeholder: 'county',
+      nullOption: {value: '', text: 'Entire country'}
     },
     category: {
-
+      placeholder: 'category',
+      nullOption: {value: '', text: 'All categories'}
     }
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    padding: 10,
     backgroundColor: '#ffffff'
   },
   filterContainer: {
-    width: 320,
-    flex: 1,
-    justifyContent: 'flex-start',
-    padding: 10,
-    marginBottom: 5
-  },
-  postContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    padding: 10,
-    marginBottom: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#b2b2b2',
-    borderBottomWidth: 1,
-    borderBottomColor: '#b2b2b2'
+    width: width * 0.8,
+    justifyContent: 'flex-start'
   },
   pictureContainer: {
     flex: 1,
@@ -198,7 +208,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     loading: state.post.isSearching,
-    searchResult: state.post.searchResult,
+    searchResult: state.post.isSearching ? [] : state.post.searchResult,
     postCount: state.post.searchResult.length
   }
 }

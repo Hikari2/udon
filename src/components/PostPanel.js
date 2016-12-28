@@ -7,7 +7,7 @@ import {
   TouchableHighlight
 } from 'react-native'
 
-export default class Card extends Component {
+export default class PostPanel extends Component {
   constructor(props) {
     super(props)
   }
@@ -15,9 +15,9 @@ export default class Card extends Component {
   render() {
     return (
       <TouchableHighlight
-        underlayColor={'#d3d3d3'}
+        underlayColor={'rgb(224,224,224)'}
         onPress={this.props.onPress}>
-        <View style={[styles.container, {width: this.props.width}]}>
+        <View style={[styles.container, {width: this.props.width - 20}]}>
           {
             this.props.data.photos[0] ?
             <Image
@@ -39,7 +39,7 @@ export default class Card extends Component {
   }
 }
 
-Card.propTypes = {
+PostPanel.propTypes = {
   width: React.PropTypes.number,
   onPress: React.PropTypes.func,
   data: React.PropTypes.shape({
@@ -55,12 +55,11 @@ const styles = StyleSheet.create({
   container: {
     height: 125,
     flexDirection: 'row',
-    padding: 7,
-    borderBottomWidth: 0.4,
-    borderBottomColor: '#b2b2b2'
+    padding: 7
   },
   picture: {
     flex: 1.2,
+    borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center'
   },

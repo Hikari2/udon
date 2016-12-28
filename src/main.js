@@ -2,14 +2,16 @@ import React, { Component } from 'react'
 import { createStore, applyMiddleware  } from 'redux'
 import thunk from 'redux-thunk'
 import { Provider, connect } from 'react-redux'
-import { Router, Scene, Switch, Modal } from 'react-native-router-flux'
+import { Router, Scene, Switch } from 'react-native-router-flux'
 import reducer from './reducers'
 import LoginPage from './containers/LoginPage'
 import MainContainer from './containers/MainContainer'
 import NewPetView from './containers/NewPetView'
 import EditPetView from './containers/EditPetView'
+import ViewPetView from './containers/ViewPetView'
+import NewPostView from './containers/NewPostView'
 import EditPostView from './containers/EditPostView'
-import PostDetailView from './containers/PostDetailView'
+import ViewPostView from './containers/ViewPostView'
 
 let store = createStore(
   reducer,
@@ -47,12 +49,20 @@ export default class udon extends Component {
                 component={EditPetView}
               />
               <Scene
+                key='viewPet'
+                component={ViewPetView}
+              />
+              <Scene
+                key='newPost'
+                component={NewPostView}
+              />
+              <Scene
                 key='editPost'
                 component={EditPostView}
               />
               <Scene
-                key='postDetail'
-                component={PostDetailView}
+                key='viewPost'
+                component={ViewPostView}
               />
             </Scene>
           </Scene>

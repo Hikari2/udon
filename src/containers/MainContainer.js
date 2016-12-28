@@ -2,18 +2,15 @@ import React, { Component } from 'react'
 import {
   ScrollView
 } from 'react-native'
-import Icon from 'react-native-vector-icons/FontAwesome'
 import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
 import ScrollableTabView  from 'react-native-scrollable-tab-view'
 import NavigationBar from '../components/NavigationBar'
 import SearchPostsView from './SearchPostsView'
-import MyPostsView from './MyPostsView'
 import NewPostView from './NewPostView'
 import UserView from './UserView'
 import { getMyPets } from '../actions/pet'
 
-const headings = ['Search', 'My posts', 'New post', 'User']
+const headings = ['Search', 'Account']
 
 class MainContainer extends Component {
   constructor(props) {
@@ -32,18 +29,16 @@ class MainContainer extends Component {
         <ScrollView tabLabel='search'>
           <SearchPostsView />
         </ScrollView>
-        <ScrollView tabLabel='folder-open'>
-          <MyPostsView />
-        </ScrollView>
-        <ScrollView tabLabel='plus'>
-          <NewPostView/>
-        </ScrollView>
         <ScrollView tabLabel='user'>
           <UserView/>
         </ScrollView>
       </ScrollableTabView>
     )
   }
+}
+
+MainContainer.propTypes = {
+  onLoad: React.PropTypes.func
 }
 
 const mapStateToProps = (state) => {

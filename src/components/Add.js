@@ -19,9 +19,9 @@ export default class Add extends Component {
     const rand = Math.floor((Math.random() * 2))
     return (
       <Image
-        resizeMode='cover'
+        resizeMode='stretch'
         source={images[rand]}
-        style={{height: 100, width: this.props.width}} />
+        style={{height: 55, width: this.props.width}} />
     )
   }
 }

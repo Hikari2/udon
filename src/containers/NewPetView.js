@@ -3,76 +3,83 @@ import {
   StyleSheet,
   Platform,
   View,
+  ActivityIndicator,
   TouchableHighlight,
+  Dimensions,
   Image,
-  ScrollView,
-  ActivityIndicator
+  Text,
+  ScrollView
 } from 'react-native'
 import { Alert } from 'react-native'
 import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
-import {registerPet} from '../actions/pet'
+import {register} from '../actions/pet'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import PetForm from '../components/PetForm'
 import ImagePicker  from 'react-native-image-picker'
+
+const { width } = Dimensions.get('window')
 
 class NewPetView extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      camera: false,
-      photo: {}
     }
   }
 
   render() {
-    return this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderForm()
-  }
-
-  renderForm() {
     return (
       <ScrollView>
-        <View style={styles.container}>
-          <PetForm user={this.props.user} onSubmit={(pet) => {
-            pet.photo = this.state.photo
-            this.props.onSubmit(pet)
-          }}>
-            <View style={styles.photoContainer}>
-            {
-              this.state.photo.path ?
-                <View style={styles.photoWrapper}>{this.savedPhoto(this.state.photo.path)}</View> :
-                <View style={styles.photoWrapper}>{this.newPhoto()}</View>
-            }
-            </View>
-          </PetForm>
-        </View>
+        {
+          this.props.loading ?
+          <ActivityIndicator
+            style={{marginTop: 120, padding: 20, transform: [{scale: 1.7}]}}
+            size={'large'}
+            color={'rgb(247,141,40)'}/> :
+          this.renderData()
+        }
       </ScrollView>
     )
   }
 
-  savedPhoto(path) {
+  renderData() {
     return (
-      <TouchableHighlight onPress={() => this.addPhoto()}>
-        <Image source={{uri: path}} style={{height: 100, width: 100}} />
-      </TouchableHighlight>
-    )
-  }
-
-  newPhoto() {
-    return(
-      <Icon.Button
-        name='camera'
-        size={30}
-        color='black'
-        backgroundColor='white'
-        style={{borderRadius: 0}}
-        iconStyle={{padding: 25, marginRight: 0}}
-        onPress={() => this.addPhoto()} />
+      <View style={styles.container}>
+        <View style={styles.topContainer}>
+          {
+            this.state.photo ?
+            <TouchableHighlight
+              underlayColor={'rgb(228,228,228)'}
+              onPress={() => this.addPhoto()}>
+              <Image source={{uri: this.state.photo}} style={styles.photoContainer} />
+            </TouchableHighlight> :
+            <TouchableHighlight
+              underlayColor={'rgb(228,228,228)'}
+              onPress={() => this.addPhoto()}>
+              <View style={styles.photoContainer}>
+                <Icon
+                  name='camera'
+                  size={50}
+                  color='rgb(106,106,106)'
+                  borderRadius={0}
+                  backgroundColor='white'
+                  iconStyle={{marginRight: 0}}/>
+                  <Text>Add picture</Text>
+              </View>
+            </TouchableHighlight>
+          }
+        </View>
+        <PetForm
+          width={width}
+          onSubmit={(pet) => {
+              pet.photo = this.state.photo ? this.state.photo : ''
+              this.props.onSubmit(pet)
+            }} />
+      </View>
     )
   }
 
   addPhoto() {
-    ImagePicker.showImagePicker(options, (response) => {
+    ImagePicker.showImagePicker(cameraOptions, (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker')
       }
@@ -89,9 +96,8 @@ class NewPetView extends Component {
         } else {
           source = response.uri.replace('file://', '')
         }
-        const photo = this.state.photo
-        photo.path = source
-        this.setState({photo})
+
+        this.setState({photo: source})
       }
     })
   }
@@ -103,8 +109,10 @@ NewPetView.propTypes = {
   onSubmit: React.PropTypes.func
 }
 
-const options = {
+const cameraOptions = {
   title: '',
+  maxWidth: 900,
+  maxHeight: 900,
   customButtons: [
 
   ],
@@ -112,38 +120,39 @@ const options = {
     skipBackup: true,
     path: 'images'
   }
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width,
     justifyContent: 'center',
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#ffffff'
+    alignItems: 'center',
+    padding: 15
+  },
+  topContainer: {
+    flexDirection: 'row'
   },
   photoContainer: {
-    flex: 1,
-    alignItems: 'center'
-  },
-  photoWrapper: {
-    borderWidth: 1,
-    borderColor: 'black',
-    marginRight: 5
+    height: width * 0.6,
+    width: width * 0.6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgb(181,181,181)'
   }
 })
 
 const mapStateToProps = (state) => {
   return {
     loading: state.pet.isRegistering,
-    user: state.auth.isAuthenticated ? state.auth.user.providerData[0] : {}
+    user: state.auth.isAuthenticated ? state.auth.user : {}
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSubmit: (post) => {
-      dispatch(registerPet(post))
+    onSubmit: (pet) => {
+      dispatch(register(pet))
     }
   }
 }

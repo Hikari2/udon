@@ -21,6 +21,7 @@ class LoginPage extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <Text style={styles.title}>{'Friendly Paws'}</Text>
         <Image source={require('../assets/logo_fade.jpg')} style={{height: 125, width: 125}} />
         <View style={styles.buttonContainer}>
           <Icon.Button name="facebook" backgroundColor="#3b5998" style={styles.button} onPress={this.props.faceBookLogin}>
@@ -37,6 +38,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  title: {
+    color: 'orange',
+    fontSize: 42,
+    fontWeight: 'bold',
+    marginBottom: 75,
+    fontFamily: 'Verdana'
   },
   buttonContainer: {
     justifyContent: 'center',

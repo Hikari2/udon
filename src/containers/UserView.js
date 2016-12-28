@@ -3,16 +3,22 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
+  Dimensions,
   ScrollView,
-  ActivityIndicator,
-  TouchableHighlight
+  ActivityIndicator
 } from 'react-native'
 import { connect } from 'react-redux'
 import { Actions } from 'react-native-router-flux'
-import Icon from 'react-native-vector-icons/FontAwesome'
 import { logout } from '../actions/auth'
 import { getMyPets } from '../actions/pet'
+import {searchOwn} from '../actions/post'
+import ProfilePanel from '../components/ProfilePanel'
+import PetPanel from '../components/PetPanel'
+import PostPanel from '../components/PostPanel'
+import Hr from '../components/Hr'
+import Option from '../components/Option'
+
+const { width } = Dimensions.get('window')
 
 class UserView extends Component {
   constructor(props) {
@@ -20,206 +26,177 @@ class UserView extends Component {
   }
 
   componentDidMount() {
-    this.props.getMyPets()
+    this.props.onLoad()
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.profileContainer}>
-          <ScrollView horizontal>
-            <View style={styles.pictureWrapper}>
-              <Image source={{uri: this.props.profilePic}} style={styles.profilePic} />
-            </View>
-            <View style={styles.profileWrapper}>
-              <Text style={styles.profileText}>{this.props.displayName}</Text>
-              <Text style={styles.profileText}>{this.props.email}</Text>
-            </View>
-          </ScrollView>
-        </View>
-        {this.props.loading ? <ActivityIndicator size={'large'} color={'rgb(247,141,40)'}/> : this.renderMyPets()}
-        <View style={styles.optionsContainer}>
-          <ScrollView>
-            <Icon.Button
-              name='plus'
-              underlayColor='grey'
-              backgroundColor='white'
-              style={styles.optionButton}
-              iconStyle={styles.optionIcon}
-              onPress={Actions.newPet}>
-              <Text size={16} style={styles.optionText} >
-                {'Create new dog profile'}
-              </Text>
-            </Icon.Button>
-          </ScrollView>
-          <ScrollView>
-            <Icon.Button
-              name='close'
-              underlayColor='grey'
-              backgroundColor='white'
-              style={styles.optionButton}
-              iconStyle={styles.optionIcon}
-              onPress={this.props.onLogoutClick}>
-              <Text size={16} style={styles.optionText} >
-                {'Logout'}
-              </Text>
-            </Icon.Button>
-          </ScrollView>
-        </View>
+        <ProfilePanel
+          width={width}
+          user={this.props.user}
+        />
+        <Hr
+          color='rgb(217,217,217)'
+          width={width - 30}
+          height={1}
+        />
+        <ScrollView>
+          {
+            this.props.loading ?
+            <ActivityIndicator
+              style={{marginTop: 120, padding: 20, transform: [{scale: 1.7}]}}
+              size={'large'}
+              color={'rgb(247,141,40)'}/> :
+            this.renderData()
+          }
+        </ScrollView>
       </View>
     )
   }
 
-  renderMyPets() {
+  renderData() {
     return (
-      this.props.myPets.map((pet, i) => {
-        return(
-          <TouchableHighlight key={`pet-${i}`} onPress={() => {Actions.editPet({data: pet})}}>
-            <View style={styles.petContainer}>
-              <View style={styles.pictureContainer}>
-                {pet.photo ? <Image source={{uri: pet.photo}} style={styles.picture}/> : <Text style={styles.picture}>No Image</Text>}
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={{fontSize: 16, fontWeight: '600'}}>{'Name: '}
-                  <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.name}</Text>
-                </Text>
-                <View style={styles.measurements}>
-                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Weight: '}
-                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.weight + ' kg'}</Text>
-                  </Text>
-                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Neck: '}
-                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.neck + ' cm'}</Text>
-                  </Text>
-                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Back: '}
-                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.back + ' cm'}</Text>
-                  </Text>
-                  <Text style={{fontSize: 16, fontWeight: '600'}}>{'Chest: '}
-                    <Text style={{fontSize: 14, fontWeight: '400'}}>{pet.chest + ' cm'}</Text>
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </TouchableHighlight>
-        )
-    }))
+      <View>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>My dogs</Text>
+        </View>
+        {
+          this.props.myPets.length >= 1 ?
+          this.props.myPets.map((pet, i) => {
+            return(
+              <PetPanel
+                data={pet}
+                width={width}
+                key={`pet-${i}`}
+                onPress={() => {Actions.viewPet({data: pet, user: this.props.user})}} />
+              )
+          }) :
+          <View />
+        }
+        <Option
+          icon='plus'
+          size={25}
+          text={'Create new dog profile'}
+          width={width}
+          height={64}
+          background={'rgb(170, 204, 93)'}
+          onPress={Actions.newPet}
+        />
+        <Hr
+          color='rgb(217,217,217)'
+          width={width - 30}
+          height={1}
+        />
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>My adverts</Text>
+        </View>
+        {
+          this.props.myPosts.length >= 1 ?
+            this.props.myPosts.map((post, i) => {
+              return(
+                <PostPanel data={post}
+                  key={`post-${i}`}
+                  width={width}
+                  onPress={()=> {
+                    Actions.viewPost({post})
+                  }}/>
+              )
+            }) :
+          <View />
+        }
+        <Option
+          icon='plus'
+          size={25}
+          text={'Create new advert'}
+          width={width}
+          height={64}
+          background={'rgb(109, 214, 224)'}
+          onPress={Actions.newPost}
+        />
+        <Hr
+          color='rgb(217,217,217)'
+          width={width - 30}
+          height={1}
+        />
+        <Option
+          icon='close'
+          size={25}
+          text={'Log out'}
+          width={width}
+          height={64}
+          background={'rgb(183, 182, 181)'}
+          onPress={this.props.onLogout}
+        />
+      </View>
+    )
   }
-
 }
 
 UserView.propTypes = {
-  getMyPets: React.PropTypes.func,
-  onLogoutClick: React.PropTypes.func,
+  onLoad: React.PropTypes.func,
+  loading: React.PropTypes.bool,
+  myPosts: React.PropTypes.array,
+  onLogout: React.PropTypes.func,
   myPets: React.PropTypes.array,
-  displayName: React.PropTypes.string,
-  email: React.PropTypes.string,
-  profilePic: React.PropTypes.string,
-  loading: React.PropTypes.bool
+  user: React.PropTypes.object
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    marginTop: 20,
-    backgroundColor: '#FFFFFF'
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: 10,
-    paddingLeft: 30,
-    backgroundColor: '#D3D3D3'
-  },
-  pictureWrapper: {
-    backgroundColor: '#FFFFFF',
+    width,
     justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
-    padding: 5
+    alignItems: 'center'
   },
-  profilePic: {
-    height: 50,
-    width: 50
+  headingContainer: {
+    justifyContent: 'center',
+    marginTop: 15,
+    marginBottom: 15,
+    marginLeft: 12,
+    marginRight: 12
   },
-  profileWrapper: {
-    padding: 25
-  },
-  profileText: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Helvetica',
-    color: '#FFFFFF'
+  heading: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'rgb(161,161,161)',
   },
   optionsContainer: {
-    flex: 1,
-    justifyContent: 'center'
+    flexDirection: 'row',
+    paddingTop: 7,
+    paddingBottom: 7,
+    marginLeft: 12,
+    marginRight: 12
   },
   optionButton: {
-    borderWidth: 0.1,
-    borderRadius: 0,
-    padding: 20,
-    borderColor: '#2C3539'
-  },
-  optionIcon: {
-    color: '#2B3856'
+    height: 50,
+    width: 50,
+    backgroundColor: 'rgb(249, 187, 72)'
   },
   optionText: {
-    color: '#2B3856',
-    fontSize: 16,
-    fontFamily: 'Helvetica'
-  },
-  petContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: 15,
-    marginBottom: 10,
-    borderBottomWidth: 0.5,
-    borderColor: 'rgb(232,232,232)'
-  },
-  pictureContainer: {
-    flex: 1,
-    justifyContent: 'center'
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: 'center'
-  },
-  measurements: {
-    borderTopWidth: 1,
-    borderTopColor: 'grey',
-    marginTop: 8,
-  },
-  text: {
-    color: '#2B3856',
-    fontSize: 16,
-    fontFamily: 'Helvetica'
-  },
-  picture: {
-    width: 100,
-    height: 100
+    flexDirection:'row',
+    alignItems:'center',
+    paddingLeft: 5
   }
 })
 
 const mapStateToProps = (state) => {
   return {
-    loading: state.pet.isSearchingPets,
-    displayName: state.auth.isAuthenticated ? state.auth.user.displayName : 'John Doe',
-    email: state.auth.isAuthenticated ? state.auth.user.email : ' ',
-    profilePic: state.auth.isAuthenticated ? state.auth.user.photoURL : ' ',
-    myPets: state.pet.myPets,
-    petCount: state.pet.myPets.length
+    loading: state.post.isSearchingOwn || state.pet.isSearching || state.pet.isUpdating,
+    user: state.auth.isAuthenticated ? state.auth.user : {},
+    myPosts: state.post.isUpdating ? [] : state.post.myPosts,
+    postCount: state.post.myPosts ? state.post.myPosts.length : 0,
+    myPets: state.pet.isUpdating ? [] : state.pet.myPets,
+    petCount: state.pet.myPets ? state.pet.myPets.length : 0,
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getMyPets: () => {
+    onLoad: () => {
       dispatch(getMyPets())
+      dispatch(searchOwn())
     },
-    onLogoutClick: () => {
+    onLogout: () => {
       dispatch(logout())
     }
   }
